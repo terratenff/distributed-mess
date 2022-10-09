@@ -1,0 +1,9 @@
+version: "3.7"
+
+services:
+  crossroad:
+    build: ./crossroad
+    ports:
+      - 8000:5000
+  redis:
+    image: "redis:alpine"
