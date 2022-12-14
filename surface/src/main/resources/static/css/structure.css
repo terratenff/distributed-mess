@@ -1,0 +1,106 @@
+html, body {
+	padding: 0px;
+	margin: 0px;
+}
+
+#top {
+	margin: 0px;
+	font-size: 0px;
+	background-color: #8cdcfe;
+	width: 100%;
+	height: 34px;
+	overflow: hidden;
+	position: fixed;
+	border-bottom-width: 3px;
+	border-bottom-style: solid;
+	border-bottom-color: black;
+}
+
+#top_logo {
+	display: inline-block;
+	vertical-align: bottom;
+	padding-inline: 5px;
+	height: 30px;
+}
+
+.top_separator {
+	display: inline-block;
+	vertical-align: top;
+	background-color: black;
+	width: 3px;
+	height: inherit;
+}
+
+#top_list {
+	display: inline-block;
+	vertical-align: top;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	padding: 0px;
+	font-size: 0px;
+	list-style-type: none;
+}
+
+#top_list > li {
+	display: inherit;
+    padding: 8px;
+    font-size: 16px;
+    font-family: sans-serif;
+	background-color: #73c991;
+}
+
+#top_list > li:hover {
+	background-color: #be6069;
+	cursor: pointer;
+}
+
+.top_right {
+	display: flex;
+	align-items: center;
+	float: right;
+	height: inherit;
+}
+
+#top_settings_button {
+	padding-inline: 5px;
+}
+
+#top_login_status {
+	padding-inline: 5px;
+	background-color: grey;
+}
+
+#top_login_status > p {
+	font-size: 16px;
+	font-family: sans-serif;
+}
+
+#top_search {
+	padding-inline: 5px;
+}
+
+#top_search > form {
+	display: flex;
+}
+
+.search_field {
+	height: 20px;
+	padding: 0px;
+	margin-inline: 3px;
+}
+
+.search_field[type="text"] {
+	font-size: 16px;
+	font-family: sans-serif;
+}
+
+.search_button {
+	cursor: pointer;
+	margin-inline: 3px;
+	background: url(/images/surface_search.png);
+	min-width: 25px;
+	height: 25px;
+	border-width: 0px;
+	background-size: cover;
+	background-position: center;
+}

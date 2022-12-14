@@ -1,0 +1,17 @@
+version: "3.7"
+
+services:
+  surface:
+    build: .
+    ports:
+      - 8001:8080
+    depends_on:
+      - db
+  db:
+    image: "postgres"
+    environment:
+      POSTGRES_USER: sample-user
+      POSTGRES_PASSWORD: sample-password
+      POSTGRES_DB: sample-db
+    ports:
+    - 8002:5432
