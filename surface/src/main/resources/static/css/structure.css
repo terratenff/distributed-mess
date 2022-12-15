@@ -54,6 +54,11 @@ html, body {
 	cursor: pointer;
 }
 
+.no_decor {
+	text-decoration: none;
+	color: inherit;
+}
+
 .top_right {
 	display: flex;
 	align-items: center;
@@ -103,4 +108,9 @@ html, body {
 	border-width: 0px;
 	background-size: cover;
 	background-position: center;
+}
+
+#center {
+	padding-top: 40px;
+	background-color: #e0e7ff;
 }

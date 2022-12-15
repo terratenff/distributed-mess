@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>surface</title>
+    <link id="sitestructure" href="/css/structure.css" th:href="@{/css/structure.css}" rel="stylesheet" />
+    <meta name="description" content="Portal for operations management.">
+    <meta name="author" content="terratenff">
+</head>
+
+<body>
+	<div id="top">
+        <a th:href="@{/}"><image id="top_logo" src="/images/surface_logo.png" th:src="@{/images/surface_logo.png}"></image></a>
+		<div class="top_separator"></div>
+        <ul id="top_list">
+			<li><a class="no_decor" th:href="@{/mission_control}">Mission Control</a></li>
+			<li><a class="no_decor" th:href="@{/resources}">Resources</a></li>
+			<li><a class="no_decor" th:href="@{/inbound_ships}">Inbound Ships</a></li>
+			<li><a class="no_decor" th:href="@{/outbound_ships}">Outbound Ships</a></li>
+		</ul>
+        <div class="top_separator"></div>
+        <div id="top_settings_button" class="top_right">
+            <image src="/images/surface_settings.png" th:src="@{/images/surface_settings.png}"></image>
+        </div>
+        <div class="top_separator top_right"></div>
+        <div id="top_login_status" class="top_right">
+            <p>Login status</p>
+        </div>
+        <div class="top_separator top_right"></div>
+        <div id="top_search" class="top_right">
+            <form th:action="@{/}" method="get">
+                <input class="search_field" type="text" id="search_text" name="search_text"/>
+                <input class="search_button" type="submit" value=""/>
+            </form>
+        </div>
+        <div class="top_separator top_right"></div>
+	</div>
+
+    <div id="center">
+        <div th:switch="${pageContext}" th:remove="tag">
+            <th:block th:case="index" th:include="fragments/general :: index"></th:block>
+            <th:block th:case="*" th:include="fragments/general :: none"></th:block>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/react@16.8.6/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16.8.6/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
+</body>
+
+</html>

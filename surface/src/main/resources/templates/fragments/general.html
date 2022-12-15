@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <div th:fragment="index" th:remove="tag">
+        <p>INDEX</p>
+        <div id="sample"></div>
+    </div>
+    <div th:fragment="none" th:remove="tag">
+        <p>(No fragment selected)</p>
+    </div>
+</body>
