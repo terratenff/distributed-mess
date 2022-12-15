@@ -14,10 +14,10 @@
         <a th:href="@{/}"><image id="top_logo" src="/images/surface_logo.png" th:src="@{/images/surface_logo.png}"></image></a>
 		<div class="top_separator"></div>
         <ul id="top_list">
-			<li>Item 1</li>
-			<li>Item 2</li>
-			<li>Item 3</li>
-			<li>Item 4</li>
+			<li>Mission Control</li>
+			<li>Resources</li>
+			<li>Inbound Ships</li>
+			<li>Outbound Ships</li>
 		</ul>
         <div class="top_separator"></div>
         <div id="top_settings_button" class="top_right">
@@ -37,8 +37,15 @@
         <div class="top_separator top_right"></div>
 	</div>
 
+    <div id="center" style="height:1600px;padding-top:40px;">
+        <div id="sample"></div>
+    </div>
+
     <script src="https://unpkg.com/react@16.8.6/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@16.8.6/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
+    <!-- TODO: Replace standalone babel script with an appropriate node package -->
+    <script type="text/babel" th:src="@{/js/react/test.jsx}"></script>
 </body>
 
 </html>
