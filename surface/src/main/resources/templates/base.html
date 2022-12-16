@@ -10,15 +10,16 @@
 </head>
 
 <body>
-	<div id="top">
+    <div id="top">
         <a th:href="@{/}"><image id="top_logo" src="/images/surface_logo.png" th:src="@{/images/surface_logo.png}"></image></a>
-		<div class="top_separator"></div>
+        <div class="top_separator"></div>
         <ul id="top_list">
-			<li><a class="no_decor" th:href="@{/mission_control}">Mission Control</a></li>
-			<li><a class="no_decor" th:href="@{/resources}">Resources</a></li>
-			<li><a class="no_decor" th:href="@{/inbound_ships}">Inbound Ships</a></li>
-			<li><a class="no_decor" th:href="@{/outbound_ships}">Outbound Ships</a></li>
-		</ul>
+            <li><a class="no_decor" th:href="@{/mission_control}">Mission Control</a></li>
+            <li><a class="no_decor" th:href="@{/resources}">Resources</a></li>
+            <li><a class="no_decor" th:href="@{/inbound_ships}">Inbound Ships</a></li>
+            <li><a class="no_decor" th:href="@{/outbound_ships}">Outbound Ships</a></li>
+            <li><a class="no_decor" th:href="@{/active_ships}">Active Ships</a></li>
+        </ul>
         <div class="top_separator"></div>
         <div id="top_settings_button" class="top_right">
             <image src="/images/surface_settings.png" th:src="@{/images/surface_settings.png}"></image>
@@ -35,18 +36,24 @@
             </form>
         </div>
         <div class="top_separator top_right"></div>
-	</div>
+    </div>
 
     <div id="center">
         <div th:switch="${pageContext}" th:remove="tag">
             <th:block th:case="index" th:include="fragments/general :: index"></th:block>
+            <th:block th:case="mission_control" th:include="fragments/general :: mission_control"></th:block>
+            <th:block th:case="resources" th:include="fragments/general :: resources"></th:block>
+            <th:block th:case="inbound_ships" th:include="fragments/general :: inbound_ships"></th:block>
+            <th:block th:case="outbound_ships" th:include="fragments/general :: outbound_ships"></th:block>
+            <th:block th:case="active_ships" th:include="fragments/general :: active_ships"></th:block>
             <th:block th:case="*" th:include="fragments/general :: none"></th:block>
         </div>
     </div>
 
-    <script src="https://unpkg.com/react@16.8.6/umd/react.production.min.js"></script>
+    <!--<script src="https://unpkg.com/react@16.8.6/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@16.8.6/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.js"></script>
+    <script type="text/babel" th:src="@{/js/react/test.jsx}"></script>-->
 </body>
 
 </html>
