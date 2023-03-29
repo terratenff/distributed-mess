@@ -23,7 +23,8 @@ public class WebSecurityConfig {
                 .anyRequest()
                 .permitAll())
             .formLogin((form) -> form.loginPage("/admin/login").permitAll())
-            .logout((logout) -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/").permitAll());
+            .logout((logout) -> logout.logoutUrl("/admin/logout").logoutSuccessUrl("/").permitAll())
+            .csrf().disable(); // TODO: Replace this workaround.
         return http.build();
     }
 

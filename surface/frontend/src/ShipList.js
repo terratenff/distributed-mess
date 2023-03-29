@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, ButtonGroup, Container, Table } from 'reactstrap';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import AppNavbar from './AppNavbar';
-import { Link } from 'react-router-dom';
 
 class ShipList extends Component {
 
@@ -74,4 +74,21 @@ class ShipList extends Component {
         );
     }
 }
-export default ShipList;
+
+function withRouter(Component) {
+    function ComponentWithRouterProp(props) {
+        let location = useLocation();
+        let navigate = useNavigate();
+        let params = useParams();
+        return (
+            <Component
+                {...props}
+                router={{ location, navigate, params }}
+            />
+        );
+    }
+  
+    return ComponentWithRouterProp;
+  }
+
+export default withRouter(ShipList);

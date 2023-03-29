@@ -18,7 +18,6 @@ class App extends Component {
   }
 
   render() {
-    const {ships} = this.state;
     return (
         <div className="App">
           <Router>
@@ -29,14 +28,6 @@ class App extends Component {
             </Routes>
           </Router>
           <header className="App-header">
-            <div className="App-intro">
-              <h2>Ships</h2>
-              {ships.map(ship =>
-                  <div key={ship.id}>
-                    {ship.name} | {ship.status} ({ship.condition} / {ship.peakCondition})
-                  </div>
-              )}
-            </div>
           </header>
         </div>
     );
