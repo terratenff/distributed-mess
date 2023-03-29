@@ -16,6 +16,7 @@ public class GeneralController {
     private static Logger logger = LoggerFactory.getLogger(GeneralController.class);
 
     private final String HOME = "";
+    private final String LOGIN = "/login";
     private final String MISSION_CONTROL = "/mission_control";
     private final String RESOURCES = "/resources";
     private final String INBOUND_SHIPS = "/inbound_ships";
@@ -27,6 +28,14 @@ public class GeneralController {
         ModelAndView mav = new ModelAndView();
         mav.setViewName("base");
         mav.addObject("pageContext", "index");
+
+        return mav;
+    }
+
+    @GetMapping(LOGIN)
+    public ModelAndView login(final HttpServletRequest request) {
+        ModelAndView mav = new ModelAndView();
+        mav.setViewName("login_page");
 
         return mav;
     }

@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>surface</title>
+    <link id="sitestructure" href="/css/structure.css" th:href="@{/css/structure.css}" rel="stylesheet" />
+    <meta name="description" content="Portal for operations management.">
+    <meta name="author" content="terratenff">
+</head>
+
+<body>
+    <p>Log in to access admin portal.</p>
+    <div th:if="${param.error}">
+        Invalid username/password.
+    </div>
+    <form th:action="@{/admin/login}" method="post">
+        <div><label> Username <input type="text" name="username"/> </label></div>
+        <div><label> Password <input type="password" name="password"/> </label></div>
+        <div><input type="submit" value="Log In"/></div>
+    </form>
+</body>
+
+</html>

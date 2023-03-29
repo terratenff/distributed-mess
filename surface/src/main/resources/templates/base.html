@@ -26,7 +26,9 @@
         </div>
         <div class="top_separator top_right"></div>
         <div id="top_login_status" class="top_right">
-            <p>Login status</p>
+            <form th:action="@{/admin/logout}" method="post">
+                <input type="submit" value="Log Out"/>
+            </form>
         </div>
         <div class="top_separator top_right"></div>
         <div id="top_search" class="top_right">
