@@ -23,8 +23,11 @@ class App extends Component {
           <Router>
             <Routes>
               <Route path="/" exact={true} element={<Home/>}/>
-              <Route path="/ships" exact={true} element={<ShipList/>}/>
-              <Route path="/ships/:id" exact={true} element={<ShipEdit/>}/>
+              <Route path="/shipyard" exact={true} element={<ShipList/>}/>
+              <Route path="/shipyard/:id" exact={true} element={<ShipEdit/>}/>
+              <Route path="/mission-control" exact={true} element={<ShipList/>}/>
+              <Route path="/mission-log" exact={true} element={<ShipList/>}/>
+              <Route path="/about" exact={true} element={<ShipList/>}/>
             </Routes>
           </Router>
           <header className="App-header">

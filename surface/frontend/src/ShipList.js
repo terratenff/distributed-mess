@@ -34,6 +34,8 @@ class ShipList extends Component {
         const {ships} = this.state;
 
         const shipList = ships.map(ship => {
+            const disableChanges = ship.status === "READY" ? false : true;
+            const opts = {"disabled": disableChanges};
             return <tr key={ship.id}>
                 <td style={{whiteSpace: 'nowrap'}}>{ship.name}</td>
                 <td>{ship.status}</td>
@@ -41,8 +43,8 @@ class ShipList extends Component {
                 <td>{ship.peakCondition}</td>
                 <td>
                     <ButtonGroup>
-                        <Button size="sm" color="primary" tag={Link} to={"/ships/" + ship.id}>Edit</Button>
-                        <Button size="sm" color="danger" onClick={() => this.remove(ship.id)}>Delete</Button>
+                        <Button size="sm" color="primary" tag={Link} to={"/shipyard/" + ship.id} {...opts}>Edit</Button>
+                        <Button size="sm" color="danger" onClick={() => this.remove(ship.id)} {...opts}>Delete</Button>
                     </ButtonGroup>
                 </td>
             </tr>
@@ -53,7 +55,7 @@ class ShipList extends Component {
                 <AppNavbar/>
                 <Container fluid>
                     <div className="float-right">
-                        <Button color="success" tag={Link} to="/ships/new">Add Ship</Button>
+                        <Button color="success" tag={Link} to="/shipyard/new">Add Ship</Button>
                     </div>
                     <h3>Ships</h3>
                     <Table className="mt-4">

@@ -7,8 +7,8 @@ class ShipEdit extends Component {
 
     emptyItem = {
         name: '',
-        status: '',
-        condition: 0,
+        status: 'READY',
+        condition: 100,
         peakCondition: 100
     };
 
@@ -25,6 +25,10 @@ class ShipEdit extends Component {
         if (this.props.router.params.id !== 'new') {
             const ship = await (await fetch(`/ships/${this.props.router.params.id}`)).json();
             this.setState({item: ship});
+        } else {
+            let item = {...this.state.item};
+            item["status"] = "READY";
+            this.setState({item});
         }
     }
 
@@ -49,7 +53,7 @@ class ShipEdit extends Component {
             },
             body: JSON.stringify(item),
         });
-        this.props.router.navigate('/ships');
+        this.props.router.navigate('/shipyard');
     }
 
     render() {
@@ -64,26 +68,26 @@ class ShipEdit extends Component {
                     <FormGroup>
                         <Label for="name">Name</Label>
                         <Input type="text" name="name" id="name" value={item.name || ''}
-                               onChange={this.handleChange} autoComplete="name"/>
+                               onChange={this.handleChange} autoComplete="name" required/>
                     </FormGroup>
                     <FormGroup>
-                        <Label for="status">Status</Label>
-                        <Input type="text" name="status" id="status" value={item.status || ''}
-                               onChange={this.handleChange} autoComplete="status"/>
+                        <Label for="status">Status</Label><br/>
+                        <Input type="text" name="status" id="status" value={item.status}
+                        onChange={this.handleChange} autoComplete="status" disabled required/>
                     </FormGroup>
                     <FormGroup>
                         <Label for="condition">Condition</Label>
-                        <Input type="text" name="condition" id="condition" value={item.condition || ''}
-                               onChange={this.handleChange} autoComplete="condition"/>
+                        <Input type="text" name="condition" id="condition" value={item.condition}
+                               onChange={this.handleChange} autoComplete="condition" required/>
                     </FormGroup>
                     <FormGroup>
                         <Label for="pcondition">Peak Condition</Label>
-                        <Input type="text" name="pcondition" id="pcondition" value={item.peakCondition || ''}
-                               onChange={this.handleChange} autoComplete="pcondition"/>
+                        <Input type="text" name="peakCondition" id="peakCondition" value={item.peakCondition}
+                               onChange={this.handleChange} autoComplete="peakCondition" required/>
                     </FormGroup>
                     <FormGroup>
                         <Button color="primary" type="submit">Save</Button>{' '}
-                        <Button color="secondary" tag={Link} to="/ships">Cancel</Button>
+                        <Button color="secondary" tag={Link} to="/shipyard">Cancel</Button>
                     </FormGroup>
                 </Form>
             </Container>
