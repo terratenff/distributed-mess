@@ -54,17 +54,18 @@ class ShipList extends Component {
             <div>
                 <AppNavbar/>
                 <Container fluid>
-                    <div className="float-right">
-                        <Button color="success" tag={Link} to="/shipyard/new">Add Ship</Button>
+                    <h3>Shipyard</h3>
+                    <div>
+                        <Button color="primary" tag={Link} to="/shipyard/new">Add Ship</Button>
                     </div>
-                    <h3>Ships</h3>
-                    <Table className="mt-4">
+                    <Table borderless hover>
                         <thead>
                         <tr>
-                            <th width="30%">Name</th>
-                            <th width="30%">Status</th>
+                            <th width="20%">Name</th>
+                            <th width="20%">Status</th>
                             <th width="20%">Current Condition</th>
                             <th width="20%">Peak Condition</th>
+                            <th width="20%">Controls</th>
                         </tr>
                         </thead>
                         <tbody>
