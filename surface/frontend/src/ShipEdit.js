@@ -9,7 +9,9 @@ class ShipEdit extends Component {
         name: '',
         status: 'READY',
         condition: 100,
-        peakCondition: 100
+        peakCondition: 100,
+        mission: null,
+        logs: []
     };
 
     constructor(props) {
