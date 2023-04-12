@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { Button, ButtonGroup, Container, Table } from 'reactstrap';
+import { Button, ButtonGroup, Container, UncontrolledAccordion, AccordionBody, AccordionHeader, AccordionItem } from 'reactstrap';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
@@ -17,42 +17,58 @@ class MissionControl extends Component {
             .then(data => this.setState({ships: data}));
     }
 
-    async destination(id) {
-        // TODO
+    async mission(id) {
+        console.log("TODO");
     }
 
     async launch(id) {
-        // TODO
+        console.log("TODO");
     }
 
     async repair(id) {
-        // TODO
+        console.log("TODO");
     }
 
     async decommission(id) {
-        // TODO
+        console.log("TODO");
     }
 
     async abort(id) {
-        // TODO
+        console.log("TODO");
     }
 
     render() {
         const {ships} = this.state;
 
         const shipList = ships.map(ship => {
-            return <tr key={ship.id}>
-                <td><img src={spaceship} alt="spaceship.png"></img><br/>{ship.status}</td>
-                <td>{ship.name}<br/>{ship.condition} / {ship.peakCondition}<br/>Insert ship description here.</td>
-                <td>-</td>
-                <td>-</td>
-                <td>
-                    <ButtonGroup>
-                        <Button size="sm" color="primary" tag={Link} to={"/shipyard/" + ship.id}>Edit</Button>
-                        <Button size="sm" color="danger" onClick={() => this.remove(ship.id)}>Delete</Button>
+            return <AccordionItem key={ship.id}>
+                <AccordionHeader targetId={ship.id}>
+                    <p style={{margin: 0, width: 10 + "%"}}>{ship.status}</p>
+                    <p style={{margin: 0, width: 25 + "%"}}>{ship.name}</p>
+                    <p style={{margin: 0, width: 5 + "%"}}>{ship.condition} / {ship.peakCondition}</p>
+                    <div style={{margin: 0, width: ship.condition + "px", height: 12 + "px", backgroundColor: "green"}}></div>
+                    <div style={{margin: 0, width: (ship.peakCondition - ship.condition) + "px", height: 12 + "px", backgroundColor: "red"}}></div>
+                </AccordionHeader>
+                <AccordionBody accordionId={ship.id}>
+                    <div style={{display: "inline-flex", float: "left"}}>
+                        <img src={spaceship} alt="spaceship.png"></img>
+                        <div style={{width: 60 + "%"}}>
+                            <p style={{margin: 0, textAlign: "left"}}>{ship.name}</p>
+                            <p style={{margin: 0, textAlign: "left"}}>ID: {ship.id}</p>
+                            <p style={{margin: 0, textAlign: "left"}}>Current Status: {ship.status}</p>
+                            <p style={{margin: 0, textAlign: "left"}}>Current Condition: {ship.condition} / {ship.peakCondition}</p>
+                        </div>
+                        <p style={{margin: 0, textAlign: "left"}}>Insert ship description here.</p>
+                    </div>
+                    <ButtonGroup vertical style={{float: "right"}}>
+                        <Button size="sm" color="primary" onClick={() => this.mission(ship.id)}>Assign Mission</Button>
+                        <Button size="sm" color="success" onClick={() => this.launch(ship.id)}>Launch Ship</Button>
+                        <Button size="sm" color="secondary" onClick={() => this.repair(ship.id)}>Conduct Repairs</Button>
+                        <Button size="sm" color="warning" onClick={() => this.abort(ship.id)}>Abort Mission</Button>
+                        <Button size="sm" color="danger" onClick={() => this.decommission(ship.id)}>Decommission Ship</Button>
                     </ButtonGroup>
-                </td>
-            </tr>
+                </AccordionBody>
+            </AccordionItem>
         });
 
         return (
@@ -66,21 +82,10 @@ class MissionControl extends Component {
                         <Button color="warning" tag={Link} to="/mission-control">Recall All Ships</Button>
                         <Button color="danger" tag={Link} to="/mission-control">Abort All Landings</Button>
                     </div>
-                    <Table borderless hover>
-                        <thead>
-                        <tr>
-                            <th width="20%">Status</th>
-                            <th width="20%">Details</th>
-                            <th width="20%">Current Destination</th>
-                            <th width="20%">Time Since Departure</th>
-                            <th width="20%">Controls</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                    <UncontrolledAccordion flush open="false">
                         {shipList}
-                        </tbody>
-                    </Table>
-                    </Container>
+                    </UncontrolledAccordion>
+                </Container>
             </div>
         );
     }
