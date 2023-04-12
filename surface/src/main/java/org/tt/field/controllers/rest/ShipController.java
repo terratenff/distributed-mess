@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,8 @@ public class ShipController {
         Ship currentShip = shipRepository.findById(id).orElseThrow(RuntimeException::new);
         currentShip.setName(ship.getName());
         currentShip.setStatus(ship.getStatus());
+        currentShip.setCondition(ship.getCondition());
+        currentShip.setPeakCondition(ship.getPeakCondition());
         currentShip.setMission(ship.getMission());
         currentShip.setLogs(ship.getLogs());
         currentShip = shipRepository.save(ship);
@@ -76,7 +79,7 @@ public class ShipController {
     }
 
     @PostMapping("/{id}/logs")
-    public ResponseEntity createLogForShip(@PathVariable Long id, @RequestBody String description) {
+    public ResponseEntity createLogForShip(@PathVariable Long id, @RequestBody Map<String, String> logData) {
         Ship ship = shipRepository.findById(id).orElse(null);
         if (ship == null) {
             logger.error("Ship with ID " + id + " not found.");
@@ -85,7 +88,7 @@ public class ShipController {
 
         logger.info("A log was created for a ship.");
 
-        Log log = new Log(Timestamp.from(Instant.now()), description);
+        Log log = new Log(Timestamp.from(Instant.now()), logData.get("description"));
         log = logRepository.save(log);
 
         List<Log> logs = ship.getLogs();

@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,7 @@ public class MissionController {
     }
 
     @PostMapping("/{id}/events")
-    public ResponseEntity createEventForMission(@PathVariable Long id, @RequestBody String description) {
+    public ResponseEntity createEventForMission(@PathVariable Long id, @RequestBody Map<String, String> eventData) {
         Mission mission = missionRepository.findById(id).orElse(null);
         if (mission == null) {
             logger.error("Mission with ID " + id + " not found.");
@@ -84,7 +85,7 @@ public class MissionController {
 
         logger.info("An event was created for a mission.");
 
-        Event event = new Event(Timestamp.from(Instant.now()), description);
+        Event event = new Event(Timestamp.from(Instant.now()), eventData.get("description"));
         event = eventRepository.save(event);
 
         List<Event> events = mission.getEvents();

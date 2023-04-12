@@ -2,6 +2,8 @@ package org.tt.field.domain;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,7 +45,9 @@ public class Event {
     }
 
     public void setTimestamp(String timestamp) {
-        this.timestamp = Timestamp.valueOf(timestamp);
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        LocalDateTime time = LocalDateTime.parse(timestamp, formatter);
+        this.timestamp = Timestamp.valueOf(time);
     }
 
     public String getDescription() {
