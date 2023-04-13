@@ -46,6 +46,16 @@ class ShipEdit extends Component {
     async handleSubmit(event) {
         event.preventDefault();
         const {item} = this.state;
+
+        if (item.condition > item.peakCondition || item.peakCondition > 500) {
+            alert("Peak condition is 500. Current condition must be lower than peak condition.");
+            return;
+        }
+
+        if (item.name.length > 50) {
+            alert("Ship name length must be 50 characters or lower.");
+            return;
+        }
     
         await fetch('/ships' + (item.id ? '/' + item.id : ''), {
             method: (item.id) ? 'PUT' : 'POST',

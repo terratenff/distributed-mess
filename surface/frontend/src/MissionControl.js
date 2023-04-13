@@ -41,15 +41,23 @@ class MissionControl extends Component {
         const {ships} = this.state;
 
         const shipList = ships.map(ship => {
+            const optsM = {"disabled": (ship.status === "READY" || ship.status === "REPAIR_IN_PROGRESS" ? false : true)};
+            const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
+            const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition ? false : true)};
+            const optsA = {"disabled": (ship.status === "TAKING_OFF" || ship.status === "OUTBOUND" || ship.status === "ACTIVE" ? false : true)};
+            const optsD = {"disabled": (ship.status === "READY" || ship.status === "BROKEN" ? false : true)};
+            const indicatorFactor = 9;
+            const conditionIndicatorWidth = ship.condition / indicatorFactor;
+            const peakConditionIndicatorWidth = (ship.peakCondition - ship.condition) / indicatorFactor;
             return <AccordionItem key={ship.id}>
-                <AccordionHeader targetId={ship.id}>
-                    <p style={{margin: 0, width: 10 + "%"}}>{ship.status}</p>
-                    <p style={{margin: 0, width: 25 + "%"}}>{ship.name}</p>
-                    <p style={{margin: 0, width: 5 + "%"}}>{ship.condition} / {ship.peakCondition}</p>
-                    <div style={{margin: 0, width: ship.condition + "px", height: 12 + "px", backgroundColor: "green"}}></div>
-                    <div style={{margin: 0, width: (ship.peakCondition - ship.condition) + "px", height: 12 + "px", backgroundColor: "red"}}></div>
+                <AccordionHeader targetId={ship.id.toString()}>
+                    <p style={{margin: 0, width: 8 + "%"}}>{ship.status}</p>
+                    <p style={{margin: 0, width: 28 + "%"}}>{ship.name}</p>
+                    <p style={{margin: 0, width: 6 + "%"}}>{ship.condition} / {ship.peakCondition}</p>
+                    <div style={{margin: 0, width: conditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "green"}}></div>
+                    <div style={{margin: 0, width: peakConditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "red"}}></div>
                 </AccordionHeader>
-                <AccordionBody accordionId={ship.id}>
+                <AccordionBody accordionId={ship.id.toString()}>
                     <div style={{display: "inline-flex", float: "left"}}>
                         <img src={spaceship} alt="spaceship.png"></img>
                         <div style={{width: 60 + "%"}}>
@@ -61,11 +69,11 @@ class MissionControl extends Component {
                         <p style={{margin: 0, textAlign: "left"}}>Insert ship description here.</p>
                     </div>
                     <ButtonGroup vertical style={{float: "right"}}>
-                        <Button size="sm" color="primary" onClick={() => this.mission(ship.id)}>Assign Mission</Button>
-                        <Button size="sm" color="success" onClick={() => this.launch(ship.id)}>Launch Ship</Button>
-                        <Button size="sm" color="secondary" onClick={() => this.repair(ship.id)}>Conduct Repairs</Button>
-                        <Button size="sm" color="warning" onClick={() => this.abort(ship.id)}>Abort Mission</Button>
-                        <Button size="sm" color="danger" onClick={() => this.decommission(ship.id)}>Decommission Ship</Button>
+                        <Button size="sm" color="primary" onClick={() => this.mission(ship.id)} {...optsM}>Assign Mission</Button>
+                        <Button size="sm" color="success" onClick={() => this.launch(ship.id)} {...optsL}>Launch Ship</Button>
+                        <Button size="sm" color="secondary" onClick={() => this.repair(ship.id)} {...optsR}>Conduct Repairs</Button>
+                        <Button size="sm" color="warning" onClick={() => this.abort(ship.id)} {...optsA}>Abort Mission</Button>
+                        <Button size="sm" color="danger" onClick={() => this.decommission(ship.id)} {...optsD}>Decommission Ship</Button>
                     </ButtonGroup>
                 </AccordionBody>
             </AccordionItem>
@@ -77,12 +85,10 @@ class MissionControl extends Component {
                 <Container fluid>
                     <h3>Mission Control</h3>
                     <div>
-                        <Button color="primary" tag={Link} to="/mission-control">Send All Ships</Button>
-                        <Button color="danger" tag={Link} to="/mission-control">Abort All Takeoffs</Button>
-                        <Button color="warning" tag={Link} to="/mission-control">Recall All Ships</Button>
-                        <Button color="danger" tag={Link} to="/mission-control">Abort All Landings</Button>
+                        <Button color="primary" tag={Link} to="/mission-control">Launch Assigned Ships</Button>
+                        <Button color="danger" tag={Link} to="/mission-control">Abort All Missions</Button>
                     </div>
-                    <UncontrolledAccordion flush open="false">
+                    <UncontrolledAccordion flush defaultOpen="0">
                         {shipList}
                     </UncontrolledAccordion>
                 </Container>
