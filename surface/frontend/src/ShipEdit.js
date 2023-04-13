@@ -10,6 +10,7 @@ class ShipEdit extends Component {
         status: 'READY',
         condition: 100,
         peakCondition: 100,
+        description: "",
         mission: null,
         logs: []
     };
@@ -80,22 +81,28 @@ class ShipEdit extends Component {
                     <FormGroup>
                         <Label for="name">Name</Label>
                         <Input type="text" name="name" id="name" value={item.name || ''}
-                               onChange={this.handleChange} autoComplete="name" required/>
+                               onChange={this.handleChange} required/>
                     </FormGroup>
                     <FormGroup>
                         <Label for="status">Status</Label><br/>
                         <Input type="text" name="status" id="status" value={item.status}
-                        onChange={this.handleChange} autoComplete="status" disabled required/>
+                        onChange={this.handleChange} disabled required/>
                     </FormGroup>
                     <FormGroup>
                         <Label for="condition">Condition</Label>
                         <Input type="text" name="condition" id="condition" value={item.condition}
-                               onChange={this.handleChange} autoComplete="condition" required/>
+                               onChange={this.handleChange} required/>
                     </FormGroup>
                     <FormGroup>
-                        <Label for="pcondition">Peak Condition</Label>
+                        <Label for="peakCondition">Peak Condition</Label>
                         <Input type="text" name="peakCondition" id="peakCondition" value={item.peakCondition}
-                               onChange={this.handleChange} autoComplete="peakCondition" required/>
+                               onChange={this.handleChange} required/>
+                    </FormGroup>
+                    <FormGroup>
+                        <Label for="description">Description</Label><br/>
+                        <Input type="textarea" name="description" id="description" value={item.description}
+                        placeholder="Write a description of what makes this ship noteworthy."
+                        onChange={this.handleChange}/>
                     </FormGroup>
                     <FormGroup>
                         <Button color="primary" type="submit">Save</Button>{' '}

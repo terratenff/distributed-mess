@@ -63,6 +63,7 @@ public class ShipController {
         currentShip.setStatus(ship.getStatus());
         currentShip.setCondition(ship.getCondition());
         currentShip.setPeakCondition(ship.getPeakCondition());
+        currentShip.setDescription(ship.getDescription());
         currentShip.setMission(ship.getMission());
         currentShip.setLogs(ship.getLogs());
         currentShip = shipRepository.save(ship);

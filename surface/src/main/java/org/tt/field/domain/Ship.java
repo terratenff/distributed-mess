@@ -15,9 +15,6 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "ship")
 public class Ship {
-
-    private static final int NAME_LIMIT = 50;
-    private static final int CONDITION_LIMIT = 500;
     
     @Id
     @GeneratedValue
@@ -33,29 +30,20 @@ public class Ship {
 
     private String name;
     private String status;
-    private int condition;
-    private int peakCondition;
+    private int condition = -1;
+    private int peakCondition = -1;
+    private String description;
 
     public Ship() {}
 
-    public Ship(Mission mission, List<Log> logs, String name, String status, int condition, int peakCondition) {
+    public Ship(Mission mission, List<Log> logs, String name, String status, int condition, int peakCondition, String description) {
         this.mission = mission;
         this.logs = logs;
         this.name = name;
         this.status = status;
         this.condition = condition;
         this.peakCondition = peakCondition;
-
-        validate();
-    }
-
-    private void validate() {
-        if (condition > peakCondition || peakCondition > CONDITION_LIMIT) {
-            throw new RuntimeException("Condition limits are broken.");
-        }
-        if (name.length() > NAME_LIMIT) {
-            throw new RuntimeException("Name character limit exceeded.");
-        }
+        this.description = description;
     }
 
     public Long getId() {
@@ -104,7 +92,6 @@ public class Ship {
 
     public void setCondition(int condition) {
         this.condition = condition;
-        validate();
     }
 
     public int getPeakCondition() {
@@ -113,6 +100,13 @@ public class Ship {
     
     public void setPeakCondition(int peakCondition) {
         this.peakCondition = peakCondition;
-        validate();
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
