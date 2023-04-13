@@ -66,7 +66,7 @@ class MissionControl extends Component {
                             <p style={{margin: 0, textAlign: "left"}}>Current Status: {ship.status}</p>
                             <p style={{margin: 0, textAlign: "left"}}>Current Condition: {ship.condition} / {ship.peakCondition}</p>
                         </div>
-                        <p style={{margin: 0, textAlign: "left"}}>Insert ship description here.</p>
+                        <p style={{margin: 0, textAlign: "left"}}>{ship.description}</p>
                     </div>
                     <ButtonGroup vertical style={{float: "right"}}>
                         <Button size="sm" color="primary" onClick={() => this.mission(ship.id)} {...optsM}>Assign Mission</Button>
