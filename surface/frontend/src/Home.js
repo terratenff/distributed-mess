@@ -7,6 +7,8 @@ class Home extends Component {
         return (
             <div>
                 <AppNavbar/>
+                <h2>Surface</h2>
+                <p>TODO: Add cards that describe recent events.</p>
             </div>
         );
     }

@@ -17,10 +17,6 @@ class MissionControl extends Component {
             .then(data => this.setState({ships: data}));
     }
 
-    async mission(id) {
-        console.log("TODO");
-    }
-
     async launch(id) {
         console.log("TODO");
     }
@@ -52,24 +48,24 @@ class MissionControl extends Component {
             return <AccordionItem key={ship.id}>
                 <AccordionHeader targetId={ship.id.toString()}>
                     <p style={{margin: 0, width: 8 + "%"}}>{ship.status}</p>
-                    <p style={{margin: 0, width: 28 + "%"}}>{ship.name}</p>
-                    <p style={{margin: 0, width: 6 + "%"}}>{ship.condition} / {ship.peakCondition}</p>
+                    <p style={{margin: 0, width: 26 + "%"}}>{ship.name}</p>
+                    <p style={{margin: 0, width: 8 + "%"}}>{ship.condition} / {ship.peakCondition}</p>
                     <div style={{margin: 0, width: conditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "green"}}></div>
                     <div style={{margin: 0, width: peakConditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "red"}}></div>
                 </AccordionHeader>
                 <AccordionBody accordionId={ship.id.toString()}>
-                    <div style={{display: "inline-flex", float: "left"}}>
-                        <img src={spaceship} alt="spaceship.png"></img>
-                        <div style={{width: 60 + "%"}}>
+                    <div style={{display: "inline-flex", float: "left", width: 85 + "%"}}>
+                        <img src={spaceship} alt="spaceship.png" style={{maxHeight: 100 + "px"}}></img>
+                        <div style={{width: 25 + "%"}}>
                             <p style={{margin: 0, textAlign: "left"}}>{ship.name}</p>
                             <p style={{margin: 0, textAlign: "left"}}>ID: {ship.id}</p>
                             <p style={{margin: 0, textAlign: "left"}}>Current Status: {ship.status}</p>
                             <p style={{margin: 0, textAlign: "left"}}>Current Condition: {ship.condition} / {ship.peakCondition}</p>
                         </div>
-                        <p style={{margin: 0, textAlign: "left"}}>{ship.description}</p>
+                        <p style={{margin: 0, width: 100 + "%", textAlign: "left"}}>{ship.description}</p>
                     </div>
                     <ButtonGroup vertical style={{float: "right"}}>
-                        <Button size="sm" color="primary" onClick={() => this.mission(ship.id)} {...optsM}>Assign Mission</Button>
+                        <Button size="sm" color="primary" tag={Link} to={"/mission-control/" + ship.id} {...optsM}>Assign Mission</Button>
                         <Button size="sm" color="success" onClick={() => this.launch(ship.id)} {...optsL}>Launch Ship</Button>
                         <Button size="sm" color="secondary" onClick={() => this.repair(ship.id)} {...optsR}>Conduct Repairs</Button>
                         <Button size="sm" color="warning" onClick={() => this.abort(ship.id)} {...optsA}>Abort Mission</Button>

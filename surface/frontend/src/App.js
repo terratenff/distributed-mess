@@ -8,6 +8,7 @@ import ShipEdit from './ShipEdit';
 import MissionControl from './MissionControl';
 import MissionLog from './MissionLog';
 import About from './About';
+import AssignMission from './mission_control/AssignMission';
 
 class App extends Component {
   state = {
@@ -29,6 +30,7 @@ class App extends Component {
               <Route path="/shipyard" exact={true} element={<ShipList/>}/>
               <Route path="/shipyard/:id" exact={true} element={<ShipEdit/>}/>
               <Route path="/mission-control" exact={true} element={<MissionControl/>}/>
+              <Route path="/mission-control/:id" exact={true} element={<AssignMission/>}/>
               <Route path="/mission-log" exact={true} element={<MissionLog/>}/>
               <Route path="/about" exact={true} element={<About/>}/>
             </Routes>

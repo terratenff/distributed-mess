@@ -2,6 +2,8 @@ package org.tt.field.domain;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +22,12 @@ public class Mission {
     @Id
     @GeneratedValue
     private Long id;
+
+    private String objective;
+    private String description;
+
+    private double centerX, centerY, centerZ;
+    private double radius;
 
     private Timestamp departureTime = Timestamp.from(Instant.now());
     private String currentDestination;
@@ -42,8 +50,57 @@ public class Mission {
     public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
+    }
+    
+    public String getObjective() {
+        return objective;
+    }
+
+    public void setObjective(String objective) {
+        this.objective = objective;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getCenterX() {
+        return centerX;
+    }
+
+    public void setCenterX(double centerX) {
+        this.centerX = centerX;
+    }
+
+    public double getCenterY() {
+        return centerY;
+    }
+
+    public void setCenterY(double centerY) {
+        this.centerY = centerY;
+    }
+
+    public double getCenterZ() {
+        return centerZ;
+    }
+
+    public void setCenterZ(double centerZ) {
+        this.centerZ = centerZ;
+    }
+
+    public double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(double radius) {
+        this.radius = radius;
     }
 
     public Timestamp getDepartureTime() {
@@ -55,7 +112,13 @@ public class Mission {
     }
 
     public void setDepartureTime(String departureTime) {
-        this.departureTime = Timestamp.valueOf(departureTime);
+        if (departureTime == null || departureTime.equals("null")) {
+            this.departureTime = null;
+        } else {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+            LocalDateTime time = LocalDateTime.parse(departureTime, formatter);
+            this.departureTime = Timestamp.valueOf(time);
+        }
     }
 
     public String getCurrentDestination() {

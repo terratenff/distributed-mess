@@ -55,10 +55,16 @@ public class MissionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateShip(@PathVariable Long id, @RequestBody Mission mission) {
+    public ResponseEntity updateMission(@PathVariable Long id, @RequestBody Mission mission) {
         logger.info("A mission was edited.");
 
         Mission currentMission = missionRepository.findById(id).orElseThrow(RuntimeException::new);
+        currentMission.setObjective(mission.getObjective());
+        currentMission.setDescription(mission.getDescription());
+        currentMission.setCenterX(mission.getCenterX());
+        currentMission.setCenterY(mission.getCenterY());
+        currentMission.setCenterZ(mission.getCenterZ());
+        currentMission.setRadius(mission.getRadius());
         currentMission.setCurrentDestination(mission.getCurrentDestination());
         currentMission.setDepartureTime(mission.getDepartureTime());
         currentMission.setFlightTime(mission.getFlightTime());
