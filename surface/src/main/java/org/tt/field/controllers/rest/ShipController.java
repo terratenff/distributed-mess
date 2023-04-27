@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.tt.field.core.Drydock;
 import org.tt.field.domain.Log;
 import org.tt.field.domain.Ship;
 import org.tt.field.repository.LogRepository;
@@ -97,6 +98,27 @@ public class ShipController {
         ship.setLogs(logs);
         shipRepository.save(ship);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/repair")
+    public ResponseEntity sendShipForRepairs(@PathVariable Long id) {
+        if (!Drydock.getInstance().isInitialized()) {
+            Drydock.getInstance().initialize(ship -> {
+                return shipRepository.save(ship);
+            });
+        }
+        Ship ship = shipRepository.findById(id).orElse(null);
+        if (ship == null) {
+            logger.error("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        } else if (ship.getStatus().equals("READY") || ship.getStatus().equals("BROKEN")) {
+            int position = Drydock.getInstance().addToQueue(ship);
+            logger.info("Ship with ID " + id + " has been sent to the drydock for repairs. Queue number: " + position + ".");
+        } else {
+            logger.warn("Ship with ID " + id + " does not need repairs.");
+        }
+        
         return ResponseEntity.ok().build();
     }
 }

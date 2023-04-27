@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
 
-class MissionControl extends Component {
+class MissionControl extends Component { // TODO: Change to functional paradigm.
 
     constructor(props) {
         super(props);
@@ -22,7 +22,10 @@ class MissionControl extends Component {
     }
 
     async repair(id) {
-        console.log("TODO");
+        fetch("/ships/" + id + "/repair");
+        fetch('/ships')
+            .then(response => response.json())
+            .then(data => this.setState({ships: data}));
     }
 
     async decommission(id) {
@@ -37,17 +40,17 @@ class MissionControl extends Component {
         const {ships} = this.state;
 
         const shipList = ships.map(ship => {
-            const optsM = {"disabled": (ship.status === "READY" || ship.status === "REPAIR_IN_PROGRESS" ? false : true)};
+            const optsM = {"disabled": (ship.status === "READY" ? false : true)};
             const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
             const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition ? false : true)};
             const optsA = {"disabled": (ship.status === "TAKING_OFF" || ship.status === "OUTBOUND" || ship.status === "ACTIVE" ? false : true)};
             const optsD = {"disabled": (ship.status === "READY" || ship.status === "BROKEN" ? false : true)};
-            const indicatorFactor = 9;
+            const indicatorFactor = 10.4;
             const conditionIndicatorWidth = ship.condition / indicatorFactor;
             const peakConditionIndicatorWidth = (ship.peakCondition - ship.condition) / indicatorFactor;
             return <AccordionItem key={ship.id}>
                 <AccordionHeader targetId={ship.id.toString()}>
-                    <p style={{margin: 0, width: 8 + "%"}}>{ship.status}</p>
+                    <p style={{margin: 0, width: 15 + "%"}}>{ship.status}</p>
                     <p style={{margin: 0, width: 26 + "%"}}>{ship.name}</p>
                     <p style={{margin: 0, width: 8 + "%"}}>{ship.condition} / {ship.peakCondition}</p>
                     <div style={{margin: 0, width: conditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "green"}}></div>
