@@ -12,9 +12,18 @@ class MissionControl extends Component { // TODO: Change to functional paradigm.
     }
 
     componentDidMount() {
+        this.timer = setInterval(() => {
+            fetch('/ships')
+                .then(response => response.json())
+                .then(data => this.setState({ships: data}));
+        }, 1000);
         fetch('/ships')
             .then(response => response.json())
             .then(data => this.setState({ships: data}));
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer);
     }
 
     async launch(id) {
