@@ -121,4 +121,18 @@ public class ShipController {
         
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{id}/decommission")
+    public ResponseEntity decommissionShip(@PathVariable Long id) {
+        Ship ship = shipRepository.findById(id).orElse(null);
+        if (ship == null) {
+            logger.error("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        } else {
+            logger.info("Ship with ID " + id + " has been decommissioned.");
+            ship.setStatus("DECOMMISSIONED");
+            shipRepository.save(ship);
+        }
+        return ResponseEntity.ok().build();
+    }
 }

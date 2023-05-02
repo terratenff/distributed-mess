@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Button, ButtonGroup, Container, Accordion, AccordionBody, AccordionHeader, AccordionItem } from 'reactstrap';
+import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, AccordionHeader, AccordionItem, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
@@ -8,8 +8,22 @@ function MissionControl() {
 
     async function refresh() {
         fetch('/ships')
-            .then(response => response.json())
-            .then(data => setShips(data));
+            .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                setNoConnection(false);
+                return response.json();
+            })
+            .then(data => setShips(data))
+            .catch(error => {
+                //console.log(error);
+                setNoConnection(true);
+            });
+        
+        //fetch('/ships')
+        //    .then(response => response.json())
+        //    .then(data => setShips(data));
     }
 
     async function launch(id) {
@@ -17,22 +31,25 @@ function MissionControl() {
     }
 
     async function repair(id) {
-        fetch("/ships/" + id + "/repair");
-        fetch('/ships')
-            .then(response => response.json())
-            .then(data => setShips(data));
+        await fetch("/ships/" + id + "/repair");
+        refresh();
     }
 
     async function decommission(id) {
-        console.log("TODO");
+        console.log("TODO " + id);
+        await fetch("/ships/" + id + "/decommission");
+        refresh();
     }
 
     async function abort(id) {
         console.log("TODO");
     }
 
-    const [ships, setShips] = useState ([]);
+    const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
+
+    const [ships, setShips] = useState([]);
     const [accordionOpen, setAccordionOpen] = useState("0");
+    const [noConnection, setNoConnection] = useState(true);
     const initialized = useRef(false);
 
     function operateAccordion(id) {
@@ -88,8 +105,22 @@ function MissionControl() {
                     <Button size="sm" color="primary" tag={Link} to={"/mission-control/" + ship.id} {...optsM}>Assign Mission</Button>
                     <Button size="sm" color="success" onClick={() => launch(ship.id)} {...optsL}>Launch Ship</Button>
                     <Button size="sm" color="secondary" onClick={() => repair(ship.id)} {...optsR}>Conduct Repairs</Button>
-                    <Button size="sm" color="warning" onClick={() => abort(ship.id)} {...optsA}>Abort Mission</Button>
-                    <Button size="sm" color="danger" onClick={() => decommission(ship.id)} {...optsD}>Decommission Ship</Button>
+                    <ConfirmationBackedButton
+                        size="sm"
+                        color="warning"
+                        buttonText="Abort Mission"
+                        headerText="Confirm Mission Aborting"
+                        contents="If a mission is aborted, the ship starts its return trip immediately, leaving its mission incomplete."
+                        onConfirmation={() => abort(ship.id)}
+                        options={optsA}/>
+                    <ConfirmationBackedButton
+                        size="sm"
+                        color="danger"
+                        buttonText="Decommission Ship"
+                        headerText="Confirm Ship Decommissioning"
+                        contents="Once a ship is decommissioned, it cannot be used anymore."
+                        onConfirmation={() => decommission(ship.id)}
+                        options={optsD}/>
                 </ButtonGroup>
             </AccordionBody>
         </AccordionItem>
@@ -99,6 +130,7 @@ function MissionControl() {
         <div>
             <AppNavbar/>
             <Container fluid>
+                {noConnection ? NO_CONNECTION_JSX : ""}
                 <h3>Mission Control</h3>
                 <div>
                     <Button color="primary" tag={Link} to="/mission-control">Launch Assigned Ships</Button>
@@ -109,6 +141,28 @@ function MissionControl() {
                 </Accordion>
             </Container>
         </div>
+    );
+}
+
+function ConfirmationBackedButton({ onConfirmation, size, color, buttonText, headerText, contents, options }) {
+    const [modal, setModal] = useState(false);
+    const toggle = () => setModal(!modal);
+    const wrappedFunction = () => {
+        toggle();
+        onConfirmation();
+    }
+    return (
+        <>
+            <Button size={size} color={color} onClick={toggle} {...options}>{buttonText}</Button>
+            <Modal isOpen={modal} toggle={toggle}>
+                <ModalHeader toggle={toggle}>{headerText}</ModalHeader>
+                <ModalBody>{contents}</ModalBody>
+                <ModalFooter>
+                    <Button color="primary" onClick={wrappedFunction}>Confirm</Button>
+                    <Button color="secondary" onClick={toggle}>Cancel</Button>
+                </ModalFooter>
+            </Modal>
+        </>
     );
 }
 

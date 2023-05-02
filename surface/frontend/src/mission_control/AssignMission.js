@@ -8,7 +8,6 @@ function AssignMission() {
 
     async function fetchShip(targetShipId) {
         const fetchedShip = await (await fetch("/ships/" + targetShipId)).json();
-        console.log(fetchedShip);
         setShip(fetchedShip);
 
         if (fetchedShip.mission !== null) {
