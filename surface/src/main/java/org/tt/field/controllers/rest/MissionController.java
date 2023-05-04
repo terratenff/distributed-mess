@@ -67,7 +67,7 @@ public class MissionController {
         currentMission.setRadius(mission.getRadius());
         currentMission.setCurrentDestination(mission.getCurrentDestination());
         currentMission.setDepartureTime(mission.getDepartureTime());
-        currentMission.setFlightTime(mission.getFlightTime());
+        currentMission.setArrivalTime(mission.getArrivalTime());
         currentMission = missionRepository.save(mission);
 
         return ResponseEntity.ok(currentMission);

@@ -1,5 +1,7 @@
 package org.tt.field.core;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -58,6 +60,7 @@ public class TransitShip extends Thread {
                     }
                     Mission mission = ship.getMission();
                     mission.setCompleted(true);
+                    mission.setArrivalTime(Timestamp.from(Instant.now()));
                     saveMissionToRepository.apply(mission);
                     ship.getPastMissions().add(mission);
                     ship.setStatus(shipStatus);

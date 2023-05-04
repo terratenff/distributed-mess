@@ -60,8 +60,8 @@ function AssignMission() {
         centerZ: 0.0,
         radius: 0.0,
         departureTime: null,
+        arrivalTime: null,
         currentDestination: "None",
-        flightTime: 0.0,
         events: []
     });
 

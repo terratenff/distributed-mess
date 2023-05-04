@@ -34,7 +34,7 @@ public class Drydock {
         if (!initialized) {
             throw new IllegalStateException("Drydock has not been initialized.");
         }
-        ship.setStatus("AWAITING_REPAIRS");
+        ship.setStatus("AWAITING_REPAIRS (" + repairQueue.size() + 1 + ")");
         repairQueue.add(saveShipToRepository.apply(ship));
         logger.info("A ship was added to queue. Queue size: " + repairQueue.size());
         return repairQueue.size();
@@ -79,7 +79,12 @@ public class Drydock {
             Thread.sleep(IDLE_TIME);
             if (targetShip == null) {
                 targetShip = repairQueue.poll();
-            } else if (targetShip.getStatus().equals("AWAITING_REPAIRS")) {
+                if (targetShip != null) {
+                    targetShip.setStatus("AWAITING_REPAIRS (Next)");
+                    targetShip = saveShipToRepository.apply(targetShip);
+                    updateQueueShipStatus();
+                }
+            } else if (targetShip.getStatus().startsWith("AWAITING_REPAIRS")) {
                 targetShip.setStatus("REPAIR_IN_PROGRESS");
                 targetShip = saveShipToRepository.apply(targetShip);
             } else {
@@ -95,6 +100,15 @@ public class Drydock {
                 saveShipToRepository.apply(targetShip);
                 targetShip = null;
             }
+        }
+    }
+
+    private void updateQueueShipStatus() {
+        int i = 1;
+        for (Ship ship : repairQueue) {
+            ship.setStatus("AWAITING_REPAIRS (" + i + ")");
+            saveShipToRepository.apply(ship);
+            i++;
         }
     }
 }

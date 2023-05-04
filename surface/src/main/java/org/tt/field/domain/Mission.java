@@ -16,7 +16,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "status")
+@Table(name = "mission")
 public class Mission {
     
     @Id
@@ -31,8 +31,8 @@ public class Mission {
     private double radius;
 
     private Timestamp departureTime = Timestamp.from(Instant.now());
+    private Timestamp arrivalTime = Timestamp.from(Instant.now());
     private String currentDestination;
-    private double flightTime;
 
     @OneToMany(cascade = CascadeType.ALL)
     @MapsId("id")
@@ -41,7 +41,7 @@ public class Mission {
     public Mission() {}
 
     public Mission(String objective, String description, boolean completed, double centerX, double centerY, double centerZ,
-            double radius, Timestamp departureTime, String currentDestination, double flightTime, List<Event> events) {
+            double radius, Timestamp departureTime, Timestamp arrivalTime, String currentDestination, List<Event> events) {
         this.objective = objective;
         this.description = description;
         this.completed = completed;
@@ -50,8 +50,8 @@ public class Mission {
         this.centerZ = centerZ;
         this.radius = radius;
         this.departureTime = departureTime;
+        this.arrivalTime = arrivalTime;
         this.currentDestination = currentDestination;
-        this.flightTime = flightTime;
         this.events = events;
     }
 
@@ -127,6 +127,14 @@ public class Mission {
         this.departureTime = departureTime;
     }
 
+    public Timestamp getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public void setArrivalTime(Timestamp arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
+
     public void setDepartureTime(String departureTime) {
         if (departureTime == null || departureTime.equals("null")) {
             this.departureTime = null;
@@ -143,14 +151,6 @@ public class Mission {
 
     public void setCurrentDestination(String currentDestination) {
         this.currentDestination = currentDestination;
-    }
-
-    public double getFlightTime() {
-        return flightTime;
-    }
-
-    public void setFlightTime(double flightTime) {
-        this.flightTime = flightTime;
     }
 
     public List<Event> getEvents() {

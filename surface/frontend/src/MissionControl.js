@@ -81,7 +81,7 @@ function MissionControl() {
         const optsM = {"disabled": (ship.status === "READY" ? false : true)};
         const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
         const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition ? false : true)};
-        const optsA = {"disabled": (ship.status === "AWAITING_TAKEOFF" || ship.status === "OUTBOUND" ? false : true)};
+        const optsA = {"disabled": (ship.status.startsWith("AWAITING_TAKEOFF") || ship.status === "OUTBOUND" ? false : true)};
         const optsD = {"disabled": (ship.status === "READY" || ship.status === "BROKEN" ? false : true)};
         const indicatorFactor = 10.4;
         const conditionIndicatorWidth = ship.condition / indicatorFactor;
