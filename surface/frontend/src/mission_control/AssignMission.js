@@ -30,7 +30,7 @@ function AssignMission() {
             body: JSON.stringify(assignedShip),
         });
 
-        navigate("/mission-control");
+        navigate("/mission-control?open-ship=" + assignedShip.id);
     }
 
     async function handleChange(event) {
@@ -53,7 +53,7 @@ function AssignMission() {
         logs: []
     });
     const [mission, setMission] = useState({
-        objective: null,
+        objective: "Exploration",
         description: null,
         centerX: 0.0,
         centerY: 0.0,
@@ -126,7 +126,7 @@ function AssignMission() {
                     </FormGroup>
                     <FormGroup>
                         <Button color="primary" type="submit">Save</Button>{' '}
-                        <Button color="secondary" tag={Link} to="/mission-control">Cancel</Button>
+                        <Button color="secondary" tag={Link} to={"/mission-control?open-ship=" + ship.id}>Cancel</Button>
                     </FormGroup>
                 </Form>
             </Container>

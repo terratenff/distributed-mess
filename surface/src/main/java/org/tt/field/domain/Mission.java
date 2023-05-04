@@ -25,6 +25,7 @@ public class Mission {
 
     private String objective;
     private String description;
+    private boolean completed = false;
 
     private double centerX, centerY, centerZ;
     private double radius;
@@ -39,8 +40,15 @@ public class Mission {
 
     public Mission() {}
 
-    public Mission(Timestamp departureTime, String currentDestination, double flightTime,
-            List<Event> events) {
+    public Mission(String objective, String description, boolean completed, double centerX, double centerY, double centerZ,
+            double radius, Timestamp departureTime, String currentDestination, double flightTime, List<Event> events) {
+        this.objective = objective;
+        this.description = description;
+        this.completed = completed;
+        this.centerX = centerX;
+        this.centerY = centerY;
+        this.centerZ = centerZ;
+        this.radius = radius;
         this.departureTime = departureTime;
         this.currentDestination = currentDestination;
         this.flightTime = flightTime;
@@ -69,6 +77,14 @@ public class Mission {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean getCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 
     public double getCenterX() {

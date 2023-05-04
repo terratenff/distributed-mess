@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,22 +20,38 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.core.Drydock;
+import org.tt.field.core.LaunchSite;
 import org.tt.field.domain.Log;
+import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
 import org.tt.field.repository.LogRepository;
+import org.tt.field.repository.MissionRepository;
 import org.tt.field.repository.ShipRepository;
 
 @RestController
 @RequestMapping("/ships")
 public class ShipController {
     private final ShipRepository shipRepository;
+    private final MissionRepository missionRepository;
     private final LogRepository logRepository;
+
+    private Function<Ship, Ship> saveShipToRepository;
+    private Function<Mission, Mission> saveMissionToRepository;
 
     private static Logger logger = LoggerFactory.getLogger(ShipController.class);
 
-    public ShipController(ShipRepository shipRepository, LogRepository logRepository) {
+    public ShipController(ShipRepository shipRepository, MissionRepository missionRepository, LogRepository logRepository) {
         this.shipRepository = shipRepository;
+        this.missionRepository = missionRepository;
         this.logRepository = logRepository;
+
+        saveShipToRepository = ship -> {
+            return shipRepository.save(ship);
+        };
+
+        saveMissionToRepository = mission -> {
+            return missionRepository.save(mission);
+        };
     }
 
     @GetMapping
@@ -66,6 +83,7 @@ public class ShipController {
         currentShip.setPeakCondition(ship.getPeakCondition());
         currentShip.setDescription(ship.getDescription());
         currentShip.setMission(ship.getMission());
+        currentShip.setPastMissions(ship.getPastMissions());
         currentShip.setLogs(ship.getLogs());
         currentShip = shipRepository.save(ship);
 
@@ -104,9 +122,7 @@ public class ShipController {
     @GetMapping("/{id}/repair")
     public ResponseEntity sendShipForRepairs(@PathVariable Long id) {
         if (!Drydock.getInstance().isInitialized()) {
-            Drydock.getInstance().initialize(ship -> {
-                return shipRepository.save(ship);
-            });
+            Drydock.getInstance().initialize(saveShipToRepository);
         }
         Ship ship = shipRepository.findById(id).orElse(null);
         if (ship == null) {
@@ -133,6 +149,26 @@ public class ShipController {
             ship.setStatus("DECOMMISSIONED");
             shipRepository.save(ship);
         }
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/launch")
+    public ResponseEntity launchShip(@PathVariable Long id) {
+        if (!LaunchSite.getInstance().isInitialized()) {
+            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository);
+        }
+
+        Ship ship = shipRepository.findById(id).orElse(null);
+        if (ship == null) {
+            logger.error("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        } else if (ship.getStatus().equals("READY")) {
+            int position = LaunchSite.getInstance().addToQueue(ship);
+            logger.info("Ship with ID " + id + " has been sent to the launch site. Queue number: " + position + ".");
+        } else {
+            logger.warn("Ship with ID " + id + " cannot be launched.");
+        }
+
         return ResponseEntity.ok().build();
     }
 }

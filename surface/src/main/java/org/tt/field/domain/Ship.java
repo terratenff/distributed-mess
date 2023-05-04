@@ -1,9 +1,11 @@
 package org.tt.field.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -24,6 +26,10 @@ public class Ship {
     @JoinColumn(nullable = true)
     private Mission mission;
 
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @MapsId("id")
+    private List<Mission> pastMissions = new ArrayList<Mission>();
+
     @OneToMany(cascade = CascadeType.PERSIST)
     @MapsId("id")
     private List<Log> logs;
@@ -36,8 +42,9 @@ public class Ship {
 
     public Ship() {}
 
-    public Ship(Mission mission, List<Log> logs, String name, String status, int condition, int peakCondition, String description) {
+    public Ship(Mission mission, List<Mission> pastMissions, List<Log> logs, String name, String status, int condition, int peakCondition, String description) {
         this.mission = mission;
+        this.pastMissions = pastMissions;
         this.logs = logs;
         this.name = name;
         this.status = status;
@@ -60,6 +67,14 @@ public class Ship {
 
     public void setMission(Mission mission) {
         this.mission = mission;
+    }
+
+    public List<Mission> getPastMissions() {
+        return pastMissions;
+    }
+
+    public void setPastMissions(List<Mission> pastMissions) {
+        this.pastMissions = pastMissions;
     }
 
     public List<Log> getLogs() {

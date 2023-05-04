@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, AccordionHeader, AccordionItem, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
 
@@ -27,7 +27,8 @@ function MissionControl() {
     }
 
     async function launch(id) {
-        console.log("TODO");
+        await fetch("/ships/" + id + "/launch");
+        refresh();
     }
 
     async function repair(id) {
@@ -47,8 +48,11 @@ function MissionControl() {
 
     const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
 
+    const searchUrl = useLocation().search;
+    const openShipId = new URLSearchParams(searchUrl).get("open-ship");
+
     const [ships, setShips] = useState([]);
-    const [accordionOpen, setAccordionOpen] = useState("0");
+    const [accordionOpen, setAccordionOpen] = useState(openShipId);
     const [noConnection, setNoConnection] = useState(true);
     const initialized = useRef(false);
 
@@ -77,7 +81,7 @@ function MissionControl() {
         const optsM = {"disabled": (ship.status === "READY" ? false : true)};
         const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
         const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition ? false : true)};
-        const optsA = {"disabled": (ship.status === "TAKING_OFF" || ship.status === "OUTBOUND" || ship.status === "ACTIVE" ? false : true)};
+        const optsA = {"disabled": (ship.status === "AWAITING_TAKEOFF" || ship.status === "OUTBOUND" ? false : true)};
         const optsD = {"disabled": (ship.status === "READY" || ship.status === "BROKEN" ? false : true)};
         const indicatorFactor = 10.4;
         const conditionIndicatorWidth = ship.condition / indicatorFactor;
@@ -103,7 +107,14 @@ function MissionControl() {
                 </div>
                 <ButtonGroup vertical style={{float: "right"}}>
                     <Button size="sm" color="primary" tag={Link} to={"/mission-control/" + ship.id} {...optsM}>Assign Mission</Button>
-                    <Button size="sm" color="success" onClick={() => launch(ship.id)} {...optsL}>Launch Ship</Button>
+                    <ConfirmationBackedButton
+                        size="sm"
+                        color="success"
+                        buttonText="Launch Ship"
+                        headerText="Confirm Ship Launch"
+                        contents="The ship becomes unavailable for the duration of the mission. Aborting its mission brings it back sooner."
+                        onConfirmation={() => launch(ship.id)}
+                        options={optsL}/>
                     <Button size="sm" color="secondary" onClick={() => repair(ship.id)} {...optsR}>Conduct Repairs</Button>
                     <ConfirmationBackedButton
                         size="sm"
