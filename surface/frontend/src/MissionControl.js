@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, AccordionHeader, AccordionItem, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, AccordionHeader, AccordionItem, UncontrolledCollapse, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { Link, useLocation } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
@@ -17,13 +17,8 @@ function MissionControl() {
             })
             .then(data => setShips(data))
             .catch(error => {
-                //console.log(error);
                 setNoConnection(true);
             });
-        
-        //fetch('/ships')
-        //    .then(response => response.json())
-        //    .then(data => setShips(data));
     }
 
     async function launch(id) {
@@ -37,7 +32,6 @@ function MissionControl() {
     }
 
     async function decommission(id) {
-        console.log("TODO " + id);
         await fetch("/ships/" + id + "/decommission");
         refresh();
     }
@@ -86,6 +80,28 @@ function MissionControl() {
         const indicatorFactor = 10.4;
         const conditionIndicatorWidth = ship.condition / indicatorFactor;
         const peakConditionIndicatorWidth = (ship.peakCondition - ship.condition) / indicatorFactor;
+
+        let missionDetailsIndicator;
+        let missionDetails;
+        if (ship.mission !== null) {
+            missionDetailsIndicator = (
+                <Button id={"collapse" + ship.id} style={{float: "left"}}>Mission Details</Button>
+            );
+            missionDetails = (
+                <UncontrolledCollapse toggler={"#collapse" + ship.id} style={{float: "left", paddingLeft: 100 + "px"}}>
+                    <p style={{marginBottom: 0, textAlign: "left"}}>Mission Objective: {ship.mission.objective}</p>
+                    <p style={{marginBottom: 0, textAlign: "left"}}>Mission Coordinates (X / Y / Z): {ship.mission.centerX} / {ship.mission.centerY} / {ship.mission.centerZ}</p>
+                    <p style={{marginBottom: 0, textAlign: "left"}}>Mission Area Radius: {ship.mission.radius}</p>
+                    <p style={{marginBottom: 0, textAlign: "left"}}>Mission Description:</p>
+                    <br/>
+                    <p style={{marginBottom: 0, textAlign: "left"}}>{ship.mission.description}</p>
+                </UncontrolledCollapse>
+            );
+        } else {
+            missionDetailsIndicator = (<p style={{float: "left"}} className="text-muted">Unassigned</p>);
+            missionDetails = (<></>);
+        }
+
         return <AccordionItem key={ship.id}>
             <AccordionHeader targetId={ship.id.toString()}>
                 <p style={{margin: 0, width: 15 + "%"}}>{ship.status}</p>
@@ -95,44 +111,48 @@ function MissionControl() {
                 <div style={{margin: 0, width: peakConditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "red"}}></div>
             </AccordionHeader>
             <AccordionBody accordionId={ship.id.toString()}>
-                <div style={{display: "inline-flex", float: "left", width: 85 + "%"}}>
-                    <img src={spaceship} alt="spaceship.png" style={{maxHeight: 100 + "px"}}></img>
-                    <div style={{width: 25 + "%"}}>
-                        <p style={{margin: 0, textAlign: "left"}}>{ship.name}</p>
-                        <p style={{margin: 0, textAlign: "left"}}>ID: {ship.id}</p>
-                        <p style={{margin: 0, textAlign: "left"}}>Current Status: {ship.status}</p>
-                        <p style={{margin: 0, textAlign: "left"}}>Current Condition: {ship.condition} / {ship.peakCondition}</p>
+                <div style={{height: "160px"}}>
+                    <div style={{display: "inline-flex", float: "left", width: 85 + "%"}}>
+                        <img src={spaceship} alt="spaceship.png" style={{maxHeight: 100 + "px"}}></img>
+                        <div style={{width: 35 + "%"}}>
+                            <p style={{margin: 0, textAlign: "left"}}>{ship.name}</p>
+                            <p style={{margin: 0, textAlign: "left"}}>ID: {ship.id}</p>
+                            <p style={{margin: 0, textAlign: "left"}}>Current Status: {ship.status}</p>
+                            <p style={{margin: 0, textAlign: "left"}}>Current Condition: {ship.condition} / {ship.peakCondition}</p>
+                            {missionDetailsIndicator}
+                        </div>
+                        <p style={{margin: 0, width: 100 + "%", textAlign: "left"}}>{ship.description}</p>
                     </div>
-                    <p style={{margin: 0, width: 100 + "%", textAlign: "left"}}>{ship.description}</p>
+                    <ButtonGroup vertical style={{float: "right"}}>
+                        <Button size="sm" color="primary" tag={Link} to={"/mission-control/" + ship.id} {...optsM}>Assign Mission</Button>
+                        <ConfirmationBackedButton
+                            size="sm"
+                            color="success"
+                            buttonText="Launch Ship"
+                            headerText="Confirm Ship Launch"
+                            contents="The ship becomes unavailable for the duration of the mission. Aborting its mission brings it back sooner."
+                            onConfirmation={() => launch(ship.id)}
+                            options={optsL}/>
+                        <Button size="sm" color="secondary" onClick={() => repair(ship.id)} {...optsR}>Conduct Repairs</Button>
+                        <ConfirmationBackedButton
+                            size="sm"
+                            color="warning"
+                            buttonText="Abort Mission"
+                            headerText="Confirm Mission Aborting"
+                            contents="If a mission is aborted, the ship starts its return trip immediately, leaving its mission incomplete."
+                            onConfirmation={() => abort(ship.id)}
+                            options={optsA}/>
+                        <ConfirmationBackedButton
+                            size="sm"
+                            color="danger"
+                            buttonText="Decommission Ship"
+                            headerText="Confirm Ship Decommissioning"
+                            contents="Once a ship is decommissioned, it cannot be used anymore."
+                            onConfirmation={() => decommission(ship.id)}
+                            options={optsD}/>
+                    </ButtonGroup>
                 </div>
-                <ButtonGroup vertical style={{float: "right"}}>
-                    <Button size="sm" color="primary" tag={Link} to={"/mission-control/" + ship.id} {...optsM}>Assign Mission</Button>
-                    <ConfirmationBackedButton
-                        size="sm"
-                        color="success"
-                        buttonText="Launch Ship"
-                        headerText="Confirm Ship Launch"
-                        contents="The ship becomes unavailable for the duration of the mission. Aborting its mission brings it back sooner."
-                        onConfirmation={() => launch(ship.id)}
-                        options={optsL}/>
-                    <Button size="sm" color="secondary" onClick={() => repair(ship.id)} {...optsR}>Conduct Repairs</Button>
-                    <ConfirmationBackedButton
-                        size="sm"
-                        color="warning"
-                        buttonText="Abort Mission"
-                        headerText="Confirm Mission Aborting"
-                        contents="If a mission is aborted, the ship starts its return trip immediately, leaving its mission incomplete."
-                        onConfirmation={() => abort(ship.id)}
-                        options={optsA}/>
-                    <ConfirmationBackedButton
-                        size="sm"
-                        color="danger"
-                        buttonText="Decommission Ship"
-                        headerText="Confirm Ship Decommissioning"
-                        contents="Once a ship is decommissioned, it cannot be used anymore."
-                        onConfirmation={() => decommission(ship.id)}
-                        options={optsD}/>
-                </ButtonGroup>
+                {missionDetails}
             </AccordionBody>
         </AccordionItem>
     });
