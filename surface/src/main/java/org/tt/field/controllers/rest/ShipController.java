@@ -4,6 +4,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -57,6 +59,11 @@ public class ShipController {
     @GetMapping
     public List<Ship> getShips() {
         return shipRepository.findAll();
+    }
+
+    @GetMapping("/assigned")
+    public List<Ship> getAssignedShips() {
+        return new ArrayList<Ship>(shipRepository.findAllAssignedShips());
     }
 
     @GetMapping("/{id}")
@@ -169,6 +176,26 @@ public class ShipController {
             logger.warn("Ship with ID " + id + " cannot be launched.");
         }
 
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/launch-all")
+    public ResponseEntity launchAllShips() {
+        if (!LaunchSite.getInstance().isInitialized()) {
+            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository);
+        }
+
+        Collection<Ship> assignedShips = shipRepository.findAllAssignedShips();
+        if (assignedShips == null || assignedShips.size() == 0) {
+            logger.warn("No assigned ships could be found.");
+            return ResponseEntity.notFound().build();
+        }
+        for (Ship ship : assignedShips) {
+            if (ship.getStatus().equals("READY")) {
+                int position = LaunchSite.getInstance().addToQueue(ship);
+                logger.info("Ship with ID " + ship.getId() + " has been sent to the launch site. Queue number: " + position + ".");
+            }
+        }
         return ResponseEntity.ok().build();
     }
 }

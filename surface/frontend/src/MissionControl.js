@@ -26,6 +26,11 @@ function MissionControl() {
         refresh();
     }
 
+    async function launchAll() {
+        await fetch("/ships/launch-all");
+        refresh();
+    }
+
     async function repair(id) {
         await fetch("/ships/" + id + "/repair");
         refresh();
@@ -38,6 +43,10 @@ function MissionControl() {
 
     async function abort(id) {
         console.log("TODO");
+    }
+
+    async function abortAll() {
+        // TODO
     }
 
     const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
@@ -164,8 +173,22 @@ function MissionControl() {
                 {noConnection ? NO_CONNECTION_JSX : ""}
                 <h3>Mission Control</h3>
                 <div>
-                    <Button color="primary" tag={Link} to="/mission-control">Launch Assigned Ships</Button>
-                    <Button color="danger" tag={Link} to="/mission-control">Abort All Missions</Button>
+                    <ConfirmationBackedButton
+                            size="lg"
+                            color="primary"
+                            buttonText="Launch Assigned Ships"
+                            headerText="Confirm Ship Launches"
+                            contents="Every assigned ship will be sent. Unassigned ships will remain."
+                            onConfirmation={() => launchAll()}
+                            options={{}}/>
+                    <ConfirmationBackedButton
+                            size="lg"
+                            color="danger"
+                            buttonText="Abort All Missions"
+                            headerText="Confirm Mission Terminations"
+                            contents="Every ship that is executing its mission is commanded to come back, leaving their missions incomplete."
+                            onConfirmation={() => abortAll()}
+                            options={{}}/>
                 </div>
                 <Accordion flush open={accordionOpen} toggle={(id) => operateAccordion(id)}>
                     {shipList}
