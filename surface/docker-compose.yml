@@ -7,6 +7,8 @@ services:
       - 8001:8080
     depends_on:
       - db
+    networks:
+      - dbnet
   db:
     image: "postgres"
     environment:
@@ -14,4 +16,12 @@ services:
       POSTGRES_PASSWORD: sample-password
       POSTGRES_DB: sample-db
     ports:
-    - 8002:5432
+      - 8002:5432
+    networks:
+      - dbnet
+  
+networks:
+  dbnet:
+    driver: bridge
+    ipam:
+      driver: default

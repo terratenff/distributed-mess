@@ -1,23 +1,26 @@
-import React, { Component } from 'react';
-import { Button, ButtonGroup, Container, Table } from 'reactstrap';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, ButtonGroup, Container, Table, Alert } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import AppNavbar from './AppNavbar';
 
-class ShipList extends Component {
+function ShipList() {
 
-    constructor(props) {
-        super(props);
-        this.state = {ships: []};
-        this.remove = this.remove.bind(this);
-    }
-
-    componentDidMount() {
+    async function refresh() {
         fetch('/ships')
-            .then(response => response.json())
-            .then(data => this.setState({ships: data}));
+            .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                setNoConnection(false);
+                return response.json();
+            })
+            .then(data => setShips(data))
+            .catch(error => {
+                setNoConnection(true);
+            });
     }
 
-    async remove(id) {
+    async function remove(id) {
         await fetch(`/ships/${id}`, {
             method: 'DELETE',
             headers: {
@@ -25,73 +28,74 @@ class ShipList extends Component {
                 'Content-Type': 'application/json'
             }
         }).then(() => {
-            let updatedShips = [...this.state.ships].filter(i => i.id !== id);
-            this.setState({ships: updatedShips});
+            let updatedShips = [...ships].filter(i => i.id !== id);
+            setShips(updatedShips);
         });
     }
 
-    render() {
-        const {ships} = this.state;
+    const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
 
-        const shipList = ships.map(ship => {
-            const disableChanges = ship.status === "READY" ? false : true;
-            const opts = {"disabled": disableChanges};
-            return <tr key={ship.id}>
-                <td style={{whiteSpace: 'nowrap'}}>{ship.name}</td>
-                <td>{ship.status}</td>
-                <td>{ship.condition}</td>
-                <td>{ship.peakCondition}</td>
-                <td>
-                    <ButtonGroup>
-                        <Button size="sm" color="primary" tag={Link} to={"/shipyard/" + ship.id} {...opts}>Edit</Button>
-                        <Button size="sm" color="danger" onClick={() => this.remove(ship.id)} {...opts}>Delete</Button>
-                    </ButtonGroup>
-                </td>
-            </tr>
-        });
+    const [ships, setShips] = useState([]);
+    const [noConnection, setNoConnection] = useState(true);
 
-        return (
-            <div>
-                <AppNavbar/>
-                <Container fluid>
-                    <h3>Shipyard</h3>
-                    <div>
-                        <Button color="primary" tag={Link} to="/shipyard/new">Add Ship</Button>
-                    </div>
-                    <Table borderless hover>
-                        <thead>
-                        <tr>
-                            <th width="20%">Name</th>
-                            <th width="20%">Status</th>
-                            <th width="20%">Current Condition</th>
-                            <th width="20%">Peak Condition</th>
-                            <th width="20%">Controls</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {shipList}
-                        </tbody>
-                    </Table>
-                </Container>
-            </div>
-        );
-    }
+    const initialized = useRef(false);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            refresh();
+        }, 5000)
+
+        if (!initialized.current) {
+            refresh();
+            initialized.current = true;
+        }
+
+        return () => clearInterval(timer);
+    });
+
+    const shipList = ships.map(ship => {
+        const disableChanges = ship.status === "READY" ? false : true;
+        const opts = {"disabled": disableChanges};
+        return <tr key={ship.id}>
+            <td style={{whiteSpace: 'nowrap'}}>{ship.name}</td>
+            <td>{ship.status}</td>
+            <td>{ship.condition}</td>
+            <td>{ship.peakCondition}</td>
+            <td>
+                <ButtonGroup>
+                    <Button size="sm" color="primary" tag={Link} to={"/shipyard/" + ship.id} {...opts}>Edit</Button>
+                    <Button size="sm" color="danger" onClick={() => remove(ship.id)} {...opts}>Delete</Button>
+                </ButtonGroup>
+            </td>
+        </tr>
+    });
+
+    return (
+        <div>
+            <AppNavbar/>
+            <Container fluid>
+                {noConnection ? NO_CONNECTION_JSX : ""}
+                <h3>Shipyard</h3>
+                <div>
+                    <Button color="primary" tag={Link} to="/shipyard/new">Add Ship</Button>
+                </div>
+                <Table borderless hover>
+                    <thead>
+                    <tr>
+                        <th width="20%">Name</th>
+                        <th width="20%">Status</th>
+                        <th width="20%">Current Condition</th>
+                        <th width="20%">Peak Condition</th>
+                        <th width="20%">Controls</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {shipList}
+                    </tbody>
+                </Table>
+            </Container>
+        </div>
+    );
 }
 
-function withRouter(Component) {
-    function ComponentWithRouterProp(props) {
-        let location = useLocation();
-        let navigate = useNavigate();
-        let params = useParams();
-        return (
-            <Component
-                {...props}
-                router={{ location, navigate, params }}
-            />
-        );
-    }
-  
-    return ComponentWithRouterProp;
-  }
-
-export default withRouter(ShipList);
+export default ShipList;
