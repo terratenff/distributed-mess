@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Container, Form, FormGroup, Input, Label } from 'reactstrap';
+import { Button, Container, Form, FormGroup, Input, Label, Table } from 'reactstrap';
 import AppNavbar from './AppNavbar';
 
 function ShipEdit() {
@@ -25,6 +25,13 @@ function ShipEdit() {
         setShip(item);
     }
 
+    function handleLogChange(event) {
+        const target = event.target;
+        const value = target.value;
+        let keyValue = {"description": value};
+        setLogEntry(keyValue);
+    }
+
     async function handleSubmit(event) {
         event.preventDefault();
 
@@ -46,6 +53,18 @@ function ShipEdit() {
             },
             body: JSON.stringify(ship),
         });
+
+        if (ship.id) {
+            await fetch('/ships/' + ship.id + "/logs", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(logEntry),
+            });
+        }
+
         navigate('/shipyard');
     }
 
@@ -59,6 +78,7 @@ function ShipEdit() {
         mission: null,
         logs: []
     });
+    const [logEntry, setLogEntry] = useState("");
 
     const shipId = useParams();
 
@@ -67,6 +87,38 @@ function ShipEdit() {
     }, [shipId.id]);
 
     const title = <h2>{ship.id ? 'Edit Ship' : 'Add Ship'}</h2>;
+    const logField = ship.id ? (
+        <FormGroup>
+            <Label for="logs">Log Entry</Label><br/>
+            <Input type="textarea" name="logs" id="logs" value={logEntry["description"]}
+            placeholder="Write a log entry for the ship."
+            onChange={handleLogChange}/>
+        </FormGroup>
+    ) : "";
+    const logTableContents = ship.logs.slice(0).reverse().map(log => {
+        return (
+            <tr key={log.id}>
+                <td>{log.timestamp}</td>
+                <td>{log.description}</td>
+            </tr>
+        );
+    });
+    const previousLogs = ship.id ? (
+        <>
+            <p>Ship Logs</p>
+            <Table className="left-aligned" borderless hover>
+                <thead>
+                    <tr>
+                        <th width="20%">Timestamp</th>
+                        <th width="80%">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {logTableContents}
+                </tbody>
+            </Table>
+        </>
+    ) : "";
 
     return (
         <div>
@@ -100,11 +152,13 @@ function ShipEdit() {
                         placeholder="Write a description of what makes this ship noteworthy."
                         onChange={handleChange}/>
                     </FormGroup>
+                    {logField}
                     <FormGroup>
                         <Button color="primary" type="submit">Save</Button>{' '}
                         <Button color="secondary" tag={Link} to="/shipyard">Cancel</Button>
                     </FormGroup>
                 </Form>
+                {previousLogs}
             </Container>
         </div>
     );
