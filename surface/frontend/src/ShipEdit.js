@@ -54,7 +54,7 @@ function ShipEdit() {
             body: JSON.stringify(ship),
         });
 
-        if (ship.id) {
+        if (ship.id && logEntry["description"].length > 0) {
             await fetch('/ships/' + ship.id + "/logs", {
                 method: 'POST',
                 headers: {
@@ -78,7 +78,7 @@ function ShipEdit() {
         mission: null,
         logs: []
     });
-    const [logEntry, setLogEntry] = useState("");
+    const [logEntry, setLogEntry] = useState({"description": ""});
 
     const shipId = useParams();
 
