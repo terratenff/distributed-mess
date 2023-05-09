@@ -3,11 +3,14 @@ package org.tt.field.core;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tt.field.domain.Log;
 import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
 
@@ -18,6 +21,7 @@ public class LaunchSite {
     
     private static final int IDLE_TIME = 10000;
     private static final int LAUNCH_TIME = 15000;
+    private static final double LOG_RATE = 0.15;
     
     public static LaunchSite getInstance() {
         if (instance == null) {
@@ -28,8 +32,10 @@ public class LaunchSite {
 
     private Function<Ship, Ship> saveShipToRepository;
     private Function<Mission, Mission> saveMissionToRepository;
+    private Function<Log, Log> saveLogToRepository;
 
     private Thread launchSiteThread;
+    private Random random = new Random();
     private Queue<Ship> launchQueue = new LinkedList<Ship>();
     private Ship targetShip;
     private boolean initialized = false;
@@ -56,9 +62,11 @@ public class LaunchSite {
         return -1;
     }
 
-    public void initialize(Function<Ship, Ship> callbackShip, Function<Mission, Mission> callbackMission) {
+    public void initialize(Function<Ship, Ship> callbackShip, Function<Mission, Mission> callbackMission, Function<Log, Log> callbackLog) {
         saveShipToRepository = callbackShip;
         saveMissionToRepository = callbackMission;
+        saveLogToRepository = callbackLog;
+
         logger.info("Setting up launch site...");
         launchSiteThread = new Thread(() -> {
             try {
@@ -95,12 +103,24 @@ public class LaunchSite {
                 targetShip = saveShipToRepository.apply(targetShip);
             } else {
                 logger.info("Ship with ID " + targetShip.getId() + " is taking off.");
-                Thread.sleep(LAUNCH_TIME);
+
+                for (int i = 0; i < LAUNCH_TIME / 1000; i++) {
+                    Thread.sleep(1000);
+
+                    if (random.nextDouble() < LOG_RATE) {
+                        addLogToShip("launch_site_flavor");
+                    }
+                }
+
                 Mission mission = targetShip.getMission();
                 mission.setDepartureTime(Timestamp.from(Instant.now()));
                 saveMissionToRepository.apply(mission);
+
+                addLogToShip("launch_site_finish_flavor");
+
                 targetShip.setStatus("OUTBOUND");
                 targetShip = saveShipToRepository.apply(targetShip);
+
                 (new TransitShip(targetShip, saveShipToRepository, saveMissionToRepository)).start();
                 logger.info("Ship with ID " + targetShip.getId() + " has finished taking off.");
                 targetShip = null;
@@ -115,5 +135,16 @@ public class LaunchSite {
             saveShipToRepository.apply(ship);
             i++;
         }
+    }
+
+    private void addLogToShip(String key) {
+        Log log = LogDistributor.getInstance().generateShipLog(targetShip, key);
+        log = saveLogToRepository.apply(log);
+        
+        List<Log> logs = targetShip.getLogs();
+        logs.add(log);
+        targetShip.setLogs(logs);
+
+        targetShip = saveShipToRepository.apply(targetShip);
     }
 }

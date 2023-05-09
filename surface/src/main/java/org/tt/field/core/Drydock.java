@@ -1,11 +1,14 @@
 package org.tt.field.core;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tt.field.domain.Log;
 import org.tt.field.domain.Ship;
 
 public class Drydock {
@@ -15,6 +18,7 @@ public class Drydock {
 
     private static final int IDLE_TIME = 10000;
     private static final int REPAIR_TIME = 5000;
+    private static final double LOG_RATE = 0.05;
     
     public static Drydock getInstance() {
         if (instance == null) {
@@ -24,7 +28,9 @@ public class Drydock {
     }
 
     private Function<Ship, Ship> saveShipToRepository;
+    private Function<Log, Log> saveLogToRepository;
     private Thread drydockThread;
+    private Random random = new Random();
     private Queue<Ship> repairQueue = new LinkedList<Ship>();
     private Ship targetShip;
     private boolean initialized = false;
@@ -34,7 +40,7 @@ public class Drydock {
         if (!initialized) {
             throw new IllegalStateException("Drydock has not been initialized.");
         }
-        ship.setStatus("AWAITING_REPAIRS (" + repairQueue.size() + 1 + ")");
+        ship.setStatus("AWAITING_REPAIRS (" + (repairQueue.size() + 1) + ")");
         repairQueue.add(saveShipToRepository.apply(ship));
         logger.info("A ship was added to queue. Queue size: " + repairQueue.size());
         return repairQueue.size();
@@ -51,8 +57,9 @@ public class Drydock {
         return -1;
     }
 
-    public void initialize(Function<Ship, Ship> callback) {
-        saveShipToRepository = callback;
+    public void initialize(Function<Ship, Ship> callbackShip, Function<Log, Log> callbackLog) {
+        saveShipToRepository = callbackShip;
+        saveLogToRepository = callbackLog;
         logger.info("Launching drydock...");
         drydockThread = new Thread(() -> {
             try {
@@ -91,9 +98,17 @@ public class Drydock {
                 logger.info("Drydock is now repairing ship with ID " + targetShip.getId() + ".");
                 while (!interruptionRequested && targetShip.getCondition() < targetShip.getPeakCondition()) {
                     Thread.sleep(REPAIR_TIME);
+
+                    if (random.nextDouble() < LOG_RATE) {
+                        addLogToShip("dry_dock_flavor");
+                    }
+
                     targetShip.setCondition(targetShip.getCondition() + 1);
                     targetShip = saveShipToRepository.apply(targetShip);
                 }
+
+                addLogToShip("dry_dock_finish_flavor");
+
                 logger.info("Drydock has finished repairing ship with ID " + targetShip.getId() + ".");
                 interruptionRequested = false;
                 targetShip.setStatus(targetShip.getCondition() > 0 ? "READY" : "BROKEN");
@@ -110,5 +125,16 @@ public class Drydock {
             saveShipToRepository.apply(ship);
             i++;
         }
+    }
+
+    private void addLogToShip(String key) {
+        Log log = LogDistributor.getInstance().generateShipLog(targetShip, key);
+        log = saveLogToRepository.apply(log);
+        
+        List<Log> logs = targetShip.getLogs();
+        logs.add(log);
+        targetShip.setLogs(logs);
+
+        targetShip = saveShipToRepository.apply(targetShip);
     }
 }

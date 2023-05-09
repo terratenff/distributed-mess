@@ -40,6 +40,7 @@ public class ShipController {
 
     private Function<Ship, Ship> saveShipToRepository;
     private Function<Mission, Mission> saveMissionToRepository;
+    private Function<Log, Log> saveLogToRepository;
 
     private static Logger logger = LoggerFactory.getLogger(ShipController.class);
 
@@ -54,6 +55,10 @@ public class ShipController {
 
         saveMissionToRepository = mission -> {
             return missionRepository.save(mission);
+        };
+
+        saveLogToRepository = log -> {
+            return logRepository.save(log);
         };
     }
 
@@ -130,7 +135,7 @@ public class ShipController {
     @GetMapping("/{id}/repair")
     public ResponseEntity sendShipForRepairs(@PathVariable Long id) {
         if (!Drydock.getInstance().isInitialized()) {
-            Drydock.getInstance().initialize(saveShipToRepository);
+            Drydock.getInstance().initialize(saveShipToRepository, saveLogToRepository);
         }
         Ship ship = shipRepository.findById(id).orElse(null);
         if (ship == null) {
@@ -163,7 +168,7 @@ public class ShipController {
     @GetMapping("/{id}/launch")
     public ResponseEntity launchShip(@PathVariable Long id) {
         if (!LaunchSite.getInstance().isInitialized()) {
-            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository);
+            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
 
         Ship ship = shipRepository.findById(id).orElse(null);
@@ -183,7 +188,7 @@ public class ShipController {
     @GetMapping("/launch-all")
     public ResponseEntity launchAllShips() {
         if (!LaunchSite.getInstance().isInitialized()) {
-            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository);
+            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
 
         Collection<Ship> assignedShips = shipRepository.findAllAssignedShips();

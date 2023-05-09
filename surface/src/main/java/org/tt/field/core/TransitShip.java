@@ -62,6 +62,7 @@ public class TransitShip extends Thread {
                     mission.setCompleted(true);
                     mission.setArrivalTime(Timestamp.from(Instant.now()));
                     saveMissionToRepository.apply(mission);
+                    
                     ship.getPastMissions().add(mission);
                     ship.setStatus(shipStatus);
                     ship.setMission(null);

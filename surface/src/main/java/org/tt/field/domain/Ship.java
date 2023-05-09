@@ -14,6 +14,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 @Entity
 @Table(name = "ship")
 public class Ship {
@@ -31,6 +34,7 @@ public class Ship {
     private List<Mission> pastMissions = new ArrayList<Mission>();
 
     @OneToMany(cascade = CascadeType.PERSIST)
+    @LazyCollection(LazyCollectionOption.FALSE)
     @MapsId("id")
     private List<Log> logs;
 
