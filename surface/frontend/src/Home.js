@@ -115,14 +115,14 @@ function Home() {
     let shipLogsData = ships.map((ship) => {
         return ship.logs;
     });
-    shipLogsData = shipLogsData.flat();
+    shipLogsData = shipLogsData.flat().reverse();
 
     const shipLogs = shipLogsData.map((currentLog) => {
         const randomId = Math.floor(Math.random() * 100);
         return (
             <motion.div style={{display: "inline-block"}} key={currentLog.id}
             initial={{opacity: 0, y: 400}}
-            whileInView={{opacity: 1, y: 0, transition: {duration: 1}}}>
+            whileInView={{opacity: 1, y: 0, transition: {duration: 0.5}}}>
             <Card
                 style={{width: "300px", height: "400px", margin: "10px", display: "inline-block", verticalAlign: "top"}}>
                 <img alt="Ship Log" src={"https://picsum.photos/id/" + randomId + "/300/200"}/>

@@ -52,7 +52,10 @@ function MissionControl() {
     const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
 
     const searchUrl = useLocation().search;
-    const openShipId = new URLSearchParams(searchUrl).get("open-ship");
+    let openShipId = new URLSearchParams(searchUrl).get("open-ship");
+    if (openShipId === null) {
+        openShipId = "0";
+    }
 
     const [ships, setShips] = useState([]);
     const [accordionOpen, setAccordionOpen] = useState(openShipId);

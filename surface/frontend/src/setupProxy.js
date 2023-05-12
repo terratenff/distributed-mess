@@ -17,4 +17,18 @@ module.exports = function(app) {
       changeOrigin: true,
     })
   );
+  app.use(
+    '/logs',
+    createProxyMiddleware({
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    })
+  );
+  app.use(
+    '/events',
+    createProxyMiddleware({
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    })
+  );
 };

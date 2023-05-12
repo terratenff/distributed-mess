@@ -1,64 +1,83 @@
-import { Component } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Container, Table } from 'reactstrap';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 
-class MissionLog extends Component {
+function MissionLog() {
 
-    constructor(props) {
-        super(props);
-        this.state = {ships: []};
+    async function fetchShipLogs() {
+        const fetchedShipLogs = await (await fetch("/logs")).json();
+        setShipLogs(fetchedShipLogs.reverse());
     }
 
-    componentDidMount() {
-        fetch('/ships')
-            .then(response => response.json())
-            .then(data => this.setState({ships: data}));
+    async function fetchMissionEvents() {
+        const fetchedMissionEvents = await (await fetch("/events")).json();
+        setMissionEvents(fetchedMissionEvents.reverse());
     }
 
-    render() {
+    const [shipLogs, setShipLogs] = useState([]);
+    const [missionEvents, setMissionEvents] = useState([]);
+
+    const initialized = useRef(false);
+
+    useEffect(() => {
+        if (!initialized.current) {
+            initialized.current = true;
+            fetchShipLogs();
+            fetchMissionEvents();
+        }
+    });
+
+    const shipLogContents = shipLogs.map((log) => {
         return (
-            <div>
-                <AppNavbar/>
-                <Container fluid>
-                    <h3>Mission Log</h3>
-                    <p>Activities of the ships are logged to the table below.</p>
-                    <Table borderless hover>
-                        <thead>
-                        <tr>
-                            <th width="30%">Timestamp</th>
-                            <th width="20%">Ship Information</th>
-                            <th width="50%">Activity</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                            </tr>
-                        </tbody>
-                    </Table>
-                    </Container>
-            </div>
+            <tr key={log.id}>
+                <td>{log.timestamp}</td>
+                <td>{log.description}</td>
+            </tr>
         );
-    }
+    });
+
+    const missionEventContents = missionEvents.map((log) => {
+        return (
+            <tr key={log.id}>
+                <td>{log.timestamp}</td>
+                <td>{log.description}</td>
+            </tr>
+        );
+    });
+
+    return (
+        <div>
+            <AppNavbar/>
+            <Container fluid>
+                <h3>Mission Log</h3>
+                <p>Activities of the ships are logged to the table below.</p>
+                <h4>Ship-specific Logs</h4>
+                <Table borderless hover style={{textAlign: "left"}}>
+                    <thead>
+                    <tr>
+                        <th width="20%">Timestamp</th>
+                        <th width="80%">Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {shipLogContents}
+                    </tbody>
+                </Table>
+                <h4>Mission-specific Logs</h4>
+                <Table borderless hover style={{textAlign: "left"}}>
+                    <thead>
+                    <tr>
+                        <th width="20%">Timestamp</th>
+                        <th width="80%">Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {missionEventContents}
+                    </tbody>
+                </Table>
+                </Container>
+        </div>
+    );
 }
 
-function withRouter(Component) {
-    function ComponentWithRouterProp(props) {
-        let location = useLocation();
-        let navigate = useNavigate();
-        let params = useParams();
-        return (
-            <Component
-                {...props}
-                router={{ location, navigate, params }}
-            />
-        );
-    }
-  
-    return ComponentWithRouterProp;
-  }
-
-export default withRouter(MissionLog);
+export default MissionLog;
