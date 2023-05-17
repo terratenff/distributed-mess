@@ -21,7 +21,7 @@ public class LaunchSite {
     
     private static final int IDLE_TIME = 10000;
     private static final int LAUNCH_TIME = 15000;
-    private static final double LOG_RATE = 0.15;
+    private static final double LOG_RATE = 0.025;
     
     public static LaunchSite getInstance() {
         if (instance == null) {
@@ -40,6 +40,25 @@ public class LaunchSite {
     private Ship targetShip;
     private boolean initialized = false;
     private boolean interruptionRequested = false;
+
+    public void abortMission(Ship ship) {
+        if (targetShip != null && targetShip.getId() == ship.getId()) {
+            interruptionRequested = true;
+        } else {
+            for (Ship queueShip : launchQueue) {
+                if (queueShip.getId() == ship.getId()) {
+                    launchQueue.remove(queueShip);
+                    updateQueueShipStatus();
+
+                    ship.setStatus("READY");
+                    ship.setMission(null);
+                    saveShipToRepository.apply(ship);
+
+                    break;
+                }
+            }
+        }
+    }
 
     public int addToQueue(Ship ship) throws IllegalStateException {
         if (!initialized) {
@@ -98,18 +117,63 @@ public class LaunchSite {
                     targetShip = saveShipToRepository.apply(targetShip);
                     updateQueueShipStatus();
                 }
+            } else if (targetShip.getStatus().startsWith("AWAITING_TAKEOFF") && interruptionRequested) {
+                interruptionRequested = false;
+                logger.warn("Ship with ID " + targetShip.getId() + " has aborted its mission. It has returned to the shipyard.");
+
+                Mission mission = targetShip.getMission();
+                mission.setArrivalTime(Timestamp.from(Instant.now()));
+                saveMissionToRepository.apply(mission);
+
+                targetShip.setStatus("READY");
+                targetShip.setMission(null);
+                saveShipToRepository.apply(targetShip);
+
+                targetShip = null;
             } else if (targetShip.getStatus().startsWith("AWAITING_TAKEOFF")) {
                 targetShip.setStatus("TAKING_OFF");
                 targetShip = saveShipToRepository.apply(targetShip);
-            } else {
                 logger.info("Ship with ID " + targetShip.getId() + " is taking off.");
 
                 for (int i = 0; i < LAUNCH_TIME / 1000; i++) {
                     Thread.sleep(1000);
 
-                    if (random.nextDouble() < LOG_RATE) {
+                    if (interruptionRequested) {
+                        break;
+                    } else if (random.nextDouble() < LOG_RATE) {
                         addLogToShip("launch_site_flavor");
                     }
+                }
+
+                if (interruptionRequested) {
+                    interruptionRequested = false;
+                    logger.warn("Ship with ID " + targetShip.getId() + " has aborted its mission. It is returning now.");
+                    targetShip.setStatus("LANDING");
+                    targetShip = saveShipToRepository.apply(targetShip);
+                    Thread.sleep(LAUNCH_TIME);
+
+                    String shipStatus;
+                    if (targetShip.getCondition() == 0) {
+                        logger.info("Ship with ID " + targetShip.getId() + " has crashed.");
+                        shipStatus = "CRASHED";
+                    } else if (targetShip.getCondition() < (targetShip.getPeakCondition() / 10)) {
+                        logger.info("Ship with ID " + targetShip.getId() + " has landed in a broken state.");
+                        shipStatus = "BROKEN";
+                    } else {
+                        logger.info("Ship with ID " + targetShip.getId() + " has landed.");
+                        shipStatus = "READY";
+                    }
+
+                    Mission mission = targetShip.getMission();
+                    mission.setArrivalTime(Timestamp.from(Instant.now()));
+                    saveMissionToRepository.apply(mission);
+
+                    targetShip.setStatus(shipStatus);
+                    targetShip.setMission(null);
+                    saveShipToRepository.apply(targetShip);
+
+                    targetShip = null;
+                    continue;
                 }
 
                 Mission mission = targetShip.getMission();
@@ -124,6 +188,8 @@ public class LaunchSite {
                 (new TransitShip(targetShip, saveShipToRepository, saveMissionToRepository)).start();
                 logger.info("Ship with ID " + targetShip.getId() + " has finished taking off.");
                 targetShip = null;
+            } else {
+                throw new IllegalStateException("A ship is in the launch site with an illegal status code: " + targetShip.getStatus());
             }
         }
     }

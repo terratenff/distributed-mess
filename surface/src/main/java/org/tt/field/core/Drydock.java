@@ -18,7 +18,7 @@ public class Drydock {
 
     private static final int IDLE_TIME = 10000;
     private static final int REPAIR_TIME = 5000;
-    private static final double LOG_RATE = 0.05;
+    private static final double LOG_RATE = 0.01;
     
     public static Drydock getInstance() {
         if (instance == null) {

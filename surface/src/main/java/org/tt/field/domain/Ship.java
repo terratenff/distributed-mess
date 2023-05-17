@@ -57,6 +57,10 @@ public class Ship {
         this.description = description;
     }
 
+    public boolean equals(Ship other) {
+        return this.id == other.id;
+    }
+
     public Long getId() {
         return id;
     }

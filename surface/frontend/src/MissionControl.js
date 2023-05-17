@@ -42,11 +42,13 @@ function MissionControl() {
     }
 
     async function abort(id) {
-        console.log("TODO");
+        await fetch("/ships/" + id + "/abort");
+        refresh();
     }
 
     async function abortAll() {
-        // TODO
+        await fetch("/ships/abort-all");
+        refresh();
     }
 
     const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
@@ -87,7 +89,7 @@ function MissionControl() {
         const optsM = {"disabled": (ship.status === "READY" ? false : true)};
         const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
         const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition ? false : true)};
-        const optsA = {"disabled": (ship.status.startsWith("AWAITING_TAKEOFF") || ship.status === "OUTBOUND" ? false : true)};
+        const optsA = {"disabled": (ship.status.startsWith("AWAITING_TAKEOFF") || ship.status === "OUTBOUND" || ship.status === "TAKING_OFF" ? false : true)};
         const optsD = {"disabled": (ship.status === "READY" || ship.status === "BROKEN" ? false : true)};
         const indicatorFactor = 10.4;
         const conditionIndicatorWidth = ship.condition / indicatorFactor;

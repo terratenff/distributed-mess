@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.core.Drydock;
 import org.tt.field.core.LaunchSite;
+import org.tt.field.core.TransitShip;
 import org.tt.field.domain.Log;
 import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
@@ -201,6 +202,44 @@ public class ShipController {
                 int position = LaunchSite.getInstance().addToQueue(ship);
                 logger.info("Ship with ID " + ship.getId() + " has been sent to the launch site. Queue number: " + position + ".");
             }
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/abort")
+    public ResponseEntity abortMission(@PathVariable Long id) {
+        if (!LaunchSite.getInstance().isInitialized()) {
+            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
+        }
+
+        Ship ship = shipRepository.findById(id).orElse(null);
+        if (ship == null) {
+            logger.error("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        } else if (ship.getMission() != null) {
+            TransitShip.abortMission(ship);
+            LaunchSite.getInstance().abortMission(ship);
+            logger.info("Ship with ID " + id + " has been instructed to abort its mission.");
+        } else {
+            logger.warn("Ship with ID " + id + " does not have a mission.");
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/abort-all")
+    public ResponseEntity abortAllMissions() {
+        if (!LaunchSite.getInstance().isInitialized()) {
+            LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
+        }
+
+        Collection<Ship> assignedShips = shipRepository.findAllAssignedShips();
+        if (assignedShips == null || assignedShips.size() == 0) {
+            logger.warn("No assigned ships could be found.");
+            return ResponseEntity.notFound().build();
+        }
+        for (Ship ship : assignedShips) {
+            // TODO
         }
         return ResponseEntity.ok().build();
     }
