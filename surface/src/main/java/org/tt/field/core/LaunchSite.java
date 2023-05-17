@@ -46,7 +46,7 @@ public class LaunchSite {
             interruptionRequested = true;
         } else {
             for (Ship queueShip : launchQueue) {
-                if (queueShip.getId() == ship.getId()) {
+                if (queueShip.equals(ship)) {
                     launchQueue.remove(queueShip);
                     updateQueueShipStatus();
 

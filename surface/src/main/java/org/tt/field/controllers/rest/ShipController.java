@@ -239,7 +239,9 @@ public class ShipController {
             return ResponseEntity.notFound().build();
         }
         for (Ship ship : assignedShips) {
-            // TODO
+            TransitShip.abortMission(ship);
+            LaunchSite.getInstance().abortMission(ship);
+            logger.info("Ship with ID " + ship.getId() + " has been instructed to abort its mission.");
         }
         return ResponseEntity.ok().build();
     }

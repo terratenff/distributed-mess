@@ -58,7 +58,7 @@ public class Ship {
     }
 
     public boolean equals(Ship other) {
-        return this.id == other.id;
+        return this.id.equals(other.id);
     }
 
     public Long getId() {

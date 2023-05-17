@@ -28,7 +28,7 @@ public class TransitShip extends Thread {
 
         TransitShip targetShip = null;
         for (TransitShip transitShip : shipsOnTransit) {
-            if (transitShip.ship.getId() == ship.getId()) {
+            if (transitShip.ship.equals(ship)) {
                 targetShip = transitShip;
                 break;
             }
