@@ -13,7 +13,13 @@ function Home() {
         setShips(fetchedShips);
     }
 
+    async function fetchMissions() {
+        const fetchedMissions = await (await fetch("/missions")).json();
+        setMissions(fetchedMissions);
+    }
+
     const [ships, setShips] = useState([]);
+    const [missions, setMissions] = useState([]);
 
     const initialized = useRef(false);
 
@@ -21,6 +27,7 @@ function Home() {
         if (!initialized.current) {
             initialized.current = true;
             fetchShips();
+            fetchMissions();
         }
     });
 
@@ -127,6 +134,7 @@ function Home() {
         }
     }
 
+    shipIndices.reverse();
     const shipLogs = shipIndices.map((index) => {
         const currentLog = shipLogsData[index];
         const currentShip = shipData[index];
@@ -148,9 +156,42 @@ function Home() {
         );
     });
 
-    const eventLogs = (
-        <p>TODO: Mission Event logs</p>
-    );
+    let missionEventsData = {};
+    let missionData = {};
+    let missionIndices = [];
+    i = 0;
+    for (let j = 0; j < missions.length; j++) {
+        const mission = missions[j];
+        for (let k = 0; k < mission.events.length; k++) {
+            const event = mission.events[k];
+            missionData[i] = mission;
+            missionEventsData[i] = event;
+            missionIndices.push(i);
+            i++;
+        }
+    }
+
+    missionIndices.reverse();
+    const eventLogs = missionIndices.map((index) => {
+        const currentEvent = missionEventsData[index];
+        const currentMission = missionData[index];
+        const randomId = Math.floor(Math.random() * 100);
+        return (
+            <motion.div style={{display: "inline-block"}} key={currentEvent.id}
+            initial={{opacity: 0, y: 400}}
+            whileInView={{opacity: 1, y: 0, transition: {duration: 0.5}}}>
+                <Card
+                    style={{width: "300px", height: "400px", margin: "10px", display: "inline-block", verticalAlign: "top"}}>
+                    <img alt="(Mission Event Illustration)" src={"https://picsum.photos/id/" + randomId + "/300/200"}/>
+                    <CardBody>
+                        <CardTitle>{currentMission.title} - Ship Event</CardTitle>
+                        <CardSubtitle className="text-muted">{currentEvent.timestamp}</CardSubtitle>
+                        <CardText>{currentEvent.description}</CardText>
+                    </CardBody>
+                </Card>
+            </motion.div>
+        );
+    });
 
     return (
         <div>
@@ -165,11 +206,10 @@ function Home() {
             <h2>Active Ships</h2>
             {busyShipsBase}
             <h2>Ship Events</h2>
-
             <Container style={{textAlign: "left"}}>
                 {shipLogs}
             </Container>
-
+            <h2>Mission Events</h2>
             <Container style={{textAlign: "left"}}>
                 {eventLogs}
             </Container>
