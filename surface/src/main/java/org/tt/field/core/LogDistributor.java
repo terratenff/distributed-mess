@@ -2,10 +2,10 @@ package org.tt.field.core;
 
 import static java.util.Map.entry;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +24,15 @@ public class LogDistributor {
 
     private static final Logger logger = LoggerFactory.getLogger(LogDistributor.class);
 
-    private static final String BASE_PATH = "src/main/resources/";
     private static final Map<String, String> FILE_PATHS = Map.ofEntries(
-        entry("dry_dock_flavor", BASE_PATH + "core/dry_dock_flavor.txt"),
-        entry("dry_dock_finish_flavor", BASE_PATH + "core/dry_dock_finish_flavor.txt"),
-        entry("landing_flavor", BASE_PATH + "core/landing_flavor.txt"),
-        entry("landing_broken_flavor", BASE_PATH + "core/landing_broken_flavor.txt"),
-        entry("landing_crashed_flavor", BASE_PATH + "core/landing_crashed_flavor.txt"),
-        entry("launch_site_flavor", BASE_PATH + "core/launch_site_flavor.txt"),
-        entry("launch_site_finish_flavor", BASE_PATH + "core/launch_site_finish_flavor.txt"),
-        entry("transit_ship_flavor", BASE_PATH + "core/transit_ship_flavor.txt")
+        entry("dry_dock_flavor", "/core/dry_dock_flavor.txt"),
+        entry("dry_dock_finish_flavor", "/core/dry_dock_finish_flavor.txt"),
+        entry("landing_flavor", "/core/landing_flavor.txt"),
+        entry("landing_broken_flavor", "/core/landing_broken_flavor.txt"),
+        entry("landing_crashed_flavor", "/core/landing_crashed_flavor.txt"),
+        entry("launch_site_flavor", "/core/launch_site_flavor.txt"),
+        entry("launch_site_finish_flavor", "/core/launch_site_finish_flavor.txt"),
+        entry("transit_ship_flavor", "/core/transit_ship_flavor.txt")
     );
     
     private static LogDistributor instance;
@@ -59,10 +57,16 @@ public class LogDistributor {
             String key = entry.getKey();
             String filePath = entry.getValue();
             List<String> contents = new ArrayList<String>();
-            Path path = Paths.get(filePath);
-            try (Stream<String> lines = Files.lines(path)) {
-                lines.forEachOrdered(line -> contents.add(line));
+
+            InputStream stream = getClass().getResourceAsStream(filePath);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    contents.add(line);
+                }
                 flavor.put(key, contents);
+
             } catch (IOException e) {
                 logger.error("Contents from file '" + filePath + "' could not be read.");
                 logger.error(e.getMessage());
