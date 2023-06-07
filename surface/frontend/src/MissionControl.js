@@ -103,6 +103,7 @@ function MissionControl() {
             );
             missionDetails = (
                 <UncontrolledCollapse toggler={"#collapse" + ship.id} style={{float: "left", paddingLeft: 100 + "px"}}>
+                    <p style={{marginBottom: 0, textAlign: "left"}}>Mission Title: {ship.mission.title}</p>
                     <p style={{marginBottom: 0, textAlign: "left"}}>Mission Objective: {ship.mission.objective}</p>
                     <p style={{marginBottom: 0, textAlign: "left"}}>Mission Coordinates (X / Y / Z): {ship.mission.centerX} / {ship.mission.centerY} / {ship.mission.centerZ}</p>
                     <p style={{marginBottom: 0, textAlign: "left"}}>Mission Area Radius: {ship.mission.radius}</p>

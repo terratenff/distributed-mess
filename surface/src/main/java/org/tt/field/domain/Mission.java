@@ -23,6 +23,7 @@ public class Mission {
     @GeneratedValue
     private Long id;
 
+    private String title;
     private String objective;
     private String description;
     private boolean completed = false;
@@ -40,8 +41,9 @@ public class Mission {
 
     public Mission() {}
 
-    public Mission(String objective, String description, boolean completed, double centerX, double centerY, double centerZ,
+    public Mission(String title, String objective, String description, boolean completed, double centerX, double centerY, double centerZ,
             double radius, Timestamp departureTime, Timestamp arrivalTime, String currentDestination, List<Event> events) {
+        this.title = title;
         this.objective = objective;
         this.description = description;
         this.completed = completed;
@@ -61,6 +63,14 @@ public class Mission {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
     
     public String getObjective() {

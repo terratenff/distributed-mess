@@ -53,6 +53,7 @@ function AssignMission() {
         logs: []
     });
     const [mission, setMission] = useState({
+        title: "",
         objective: "Exploration",
         description: null,
         centerX: 0.0,
@@ -87,6 +88,11 @@ function AssignMission() {
                     <p style={{margin: 0, width: 100 + "%", textAlign: "left"}}>{ship.description}</p>
                 </div>
                 <Form onSubmit={handleSubmit}>
+                    <FormGroup>
+                        <Label for="title">Mission Title</Label>
+                        <Input type="text" name="title" id="title" defaultValue={mission.title}
+                            placeholder="Insert Mission Title Here" onChange={handleChange} key={mission.title} required/>
+                    </FormGroup>
                     <FormGroup>
                         <Label for="objective">Mission Objective</Label>
                         <Input type="select" name="objective" id="objective" defaultValue={mission.objective}

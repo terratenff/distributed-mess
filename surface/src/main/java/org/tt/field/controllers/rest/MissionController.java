@@ -59,6 +59,7 @@ public class MissionController {
         logger.info("A mission was edited.");
 
         Mission currentMission = missionRepository.findById(id).orElseThrow(RuntimeException::new);
+        currentMission.setTitle(mission.getTitle());
         currentMission.setObjective(mission.getObjective());
         currentMission.setDescription(mission.getDescription());
         currentMission.setCenterX(mission.getCenterX());
