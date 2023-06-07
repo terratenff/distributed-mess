@@ -112,29 +112,45 @@ function Home() {
         );
     }
 
-    let shipLogsData = ships.map((ship) => {
-        return ship.logs;
-    });
-    shipLogsData = shipLogsData.flat().reverse();
+    let shipLogsData = {};
+    let shipData = {};
+    let shipIndices = [];
+    let i = 0;
+    for (let j = 0; j < ships.length; j++) {
+        const ship = ships[j];
+        for (let k = 0; k < ship.logs.length; k++) {
+            const log = ship.logs[k];
+            shipData[i] = ship;
+            shipLogsData[i] = log;
+            shipIndices.push(i);
+            i++;
+        }
+    }
 
-    const shipLogs = shipLogsData.map((currentLog) => {
+    const shipLogs = shipIndices.map((index) => {
+        const currentLog = shipLogsData[index];
+        const currentShip = shipData[index];
         const randomId = Math.floor(Math.random() * 100);
         return (
             <motion.div style={{display: "inline-block"}} key={currentLog.id}
             initial={{opacity: 0, y: 400}}
             whileInView={{opacity: 1, y: 0, transition: {duration: 0.5}}}>
-            <Card
-                style={{width: "300px", height: "400px", margin: "10px", display: "inline-block", verticalAlign: "top"}}>
-                <img alt="Ship Log" src={"https://picsum.photos/id/" + randomId + "/300/200"}/>
-                <CardBody>
-                    <CardTitle>Ship Name</CardTitle>
-                    <CardSubtitle className="text-muted">{currentLog.timestamp}</CardSubtitle>
-                    <CardText>{currentLog.description}</CardText>
-                </CardBody>
-            </Card>
+                <Card
+                    style={{width: "300px", height: "400px", margin: "10px", display: "inline-block", verticalAlign: "top"}}>
+                    <img alt="(Ship Log Illustration)" src={"https://picsum.photos/id/" + randomId + "/300/200"}/>
+                    <CardBody>
+                        <CardTitle>{currentShip.name} - Ship Log</CardTitle>
+                        <CardSubtitle className="text-muted">{currentLog.timestamp}</CardSubtitle>
+                        <CardText>{currentLog.description}</CardText>
+                    </CardBody>
+                </Card>
             </motion.div>
         );
     });
+
+    const eventLogs = (
+        <p>TODO: Mission Event logs</p>
+    );
 
     return (
         <div>
@@ -152,6 +168,10 @@ function Home() {
 
             <Container style={{textAlign: "left"}}>
                 {shipLogs}
+            </Container>
+
+            <Container style={{textAlign: "left"}}>
+                {eventLogs}
             </Container>
         </div>
     );

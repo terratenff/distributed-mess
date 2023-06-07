@@ -21,7 +21,7 @@ public class LaunchSite {
     
     private static final int IDLE_TIME = 10000;
     private static final int LAUNCH_TIME = 15000;
-    private static final double LOG_RATE = 0.025;
+    private static final double LOG_RATE = 0.001;
     
     public static LaunchSite getInstance() {
         if (instance == null) {
