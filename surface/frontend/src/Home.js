@@ -6,6 +6,7 @@ import AppNavbar from './AppNavbar';
 import AppFooter from './AppFooter';
 import spaceship from "./images/spaceship.png";
 import HomeCarousel from "./components/HomeCarousel";
+import HomeNav from "./components/HomeNav";
 
 function Home() {
 
@@ -276,7 +277,7 @@ function Home() {
     return (
         <div>
             <AppNavbar/>
-            <h1>Surface</h1>
+            <h1 id="surface-title">Surface</h1>
             <p>Send ships to "space" to do things.</p>
 
             <HomeCarousel/>
@@ -285,19 +286,20 @@ function Home() {
                 <Button onClick={() => refresh()}>Refresh</Button>
             </Container>
 
-            <h2>Available Ships</h2>
+            <h2 id="available-ships-title">Available Ships</h2>
             {availableShipsBase}
-            <h2>Active Ships</h2>
+            <h2 id="active-ships-title">Active Ships</h2>
             {busyShipsBase}
-            <h2>Ship Events</h2>
+            <h2 id="ship-events-title">Ship Events</h2>
             <Container style={{textAlign: "left"}}>
                 {shipLogs}
             </Container>
-            <h2>Mission Events</h2>
+            <h2 id="mission-events-title">Mission Events</h2>
             <Container style={{textAlign: "left"}}>
                 {missionEvents}
             </Container>
 
+            <HomeNav/>
             <AppFooter/>
         </div>
     );
