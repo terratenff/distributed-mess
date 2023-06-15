@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.domain.Event;
 import org.tt.field.repository.EventRepository;
@@ -30,8 +31,18 @@ public class EventController {
     }
 
     @GetMapping
-    public List<Event> getEvents() {
-        return eventRepository.findAll();
+    public List<Event> getEvents(@RequestParam(name = "page", required = false) String pageStr) {
+        if (pageStr == null) {
+            return eventRepository.findAll();
+        } else {
+            try {
+                final int limit = 10;
+                final int page = Integer.parseInt(pageStr);
+                return eventRepository.findEvents(limit, limit * page);
+            } catch (NumberFormatException e) {
+                return List.of();
+            }
+        }
     }
 
     @GetMapping("/{id}")

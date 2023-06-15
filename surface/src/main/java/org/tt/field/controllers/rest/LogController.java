@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.domain.Log;
 import org.tt.field.repository.LogRepository;
@@ -30,8 +31,18 @@ public class LogController {
     }
 
     @GetMapping
-    public List<Log> getLogs() {
-        return logRepository.findAll();
+    public List<Log> getLogs(@RequestParam(name = "page", required = false) String pageStr) {
+        if (pageStr == null) {
+            return logRepository.findAll();
+        } else {
+            try {
+                final int limit = 10;
+                final int page = Integer.parseInt(pageStr);
+                return logRepository.findLogs(limit, limit * page);
+            } catch (NumberFormatException e) {
+                return List.of();
+            }
+        }
     }
 
     @GetMapping("/{id}")
