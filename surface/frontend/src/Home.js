@@ -8,38 +8,61 @@ import spaceship from "./images/spaceship.png";
 import HomeCarousel from "./components/HomeCarousel";
 import HomeNav from "./components/HomeNav";
 
+/**
+ * Creates the home page of the application.
+ * @returns Home page.
+ */
 function Home() {
 
+    /**
+     * Collects every ship entity and updates the component with them.
+     */
     async function fetchShips() {
         const fetchedShips = await (await fetch("/ships")).json();
         setShips(fetchedShips);
     }
 
+    /**
+     * Collects every mission entity and updates the component with them.
+     */
     async function fetchMissions() {
         const fetchedMissions = await (await fetch("/missions")).json();
         setMissions(fetchedMissions);
     }
 
+    /**
+     * Refreshes the component (by fetching all ships and missions).
+     */
     async function refresh() {
         fetchShips();
         fetchMissions();
     }
 
+    /**
+     * Increases the number of ship logs that are shown on the home page.
+     */
     async function showMoreShipLogs() {
-        setMaxLogs(maxLogs + loadIncrement);
+        setMaxLogs(maxLogs + LOAD_INCREMENT);
     }
 
+    /**
+     * Increases the number of mission events that are shown on the home page.
+     */
     async function showMoreMissionEvents() {
-        setMaxEvents(maxEvents + loadIncrement);
+        setMaxEvents(maxEvents + LOAD_INCREMENT);
     }
 
-    const loadIncrement = 12;
+    /**
+     * Represents how many ship logs / events are shown on the home page at the beginning,
+     * and how many of them are added to the home page when more are requested.
+     */
+    const LOAD_INCREMENT = 12;
 
     const [ships, setShips] = useState([]);
     const [missions, setMissions] = useState([]);
 
-    const [maxLogs, setMaxLogs] = useState(loadIncrement);
-    const [maxEvents, setMaxEvents] = useState(loadIncrement);
+    const [maxLogs, setMaxLogs] = useState(LOAD_INCREMENT);
+    const [maxEvents, setMaxEvents] = useState(LOAD_INCREMENT);
     const initialized = useRef(false);
 
     useEffect(() => {
@@ -49,6 +72,8 @@ function Home() {
             fetchMissions();
         }
     });
+
+    // Building a subcomponent that displays a list of available ships.
 
     let availableShipsBase = (<p>There are no ships available. Create more or wait for existing ones to become available.</p>);
     let availableShipsCount = 0;
@@ -94,6 +119,8 @@ function Home() {
         );
     }
     
+    // Building a subcomponent that displays a list of busy ships.
+
     let busyShipsBase = (<p>All of the ships are idle. Send some to missions to space or repair them.</p>);
     let busyShipsCount = 0;
     const busyShips = ships.map((ship) => {
@@ -138,12 +165,16 @@ function Home() {
         );
     }
 
+    // Building a subcomponent that displays a collection of ship logs.
+
     let shipLogsData = {};
     let shipLogsTimestamps = [];
     let shipData = {};
     let shipIndices = [];
     let allLogsLoaded = true;
     let i = 0;
+
+    // Collect logs from every ship.
     for (let j = 0; j < ships.length; j++) {
         const ship = ships[j];
         for (let k = 0; k < ship.logs.length; k++) {
@@ -156,7 +187,7 @@ function Home() {
         }
     }
 
-    allLogsLoaded = i <= maxLogs;
+    allLogsLoaded = i <= maxLogs; // This determines whether a "Load More" button should be shown.
     shipIndices.sort(function(a, b) {
         return Date.parse(shipLogsTimestamps[b]) - Date.parse(shipLogsTimestamps[a]);
     });
@@ -172,7 +203,7 @@ function Home() {
         shipLogsCore = shipIndices.map((index) => {
             const currentLog = shipLogsData[index];
             const currentShip = shipData[index];
-            const randomId = Math.floor(Math.random() * 100);
+            const randomId = Math.floor(Math.random() * 100); // ID for a placeholder image.
             return (
                 <motion.div style={{display: "inline-block"}} key={currentLog.id}
                 initial={{opacity: 0, y: 400}}
@@ -206,6 +237,8 @@ function Home() {
         </>
     );
 
+    // Building a subcomponent that displays a collection of mission events.
+
     let missionEventsData = {};
     let missionEventsTimestamps = [];
     let missionData = {};
@@ -224,7 +257,7 @@ function Home() {
         }
     }
 
-    allEventsLoaded = i <= maxEvents;
+    allEventsLoaded = i <= maxEvents; // This determines whether a "Load More" button should be shown.
     missionIndices.sort(function(a, b) {
         return Date.parse(missionEventsTimestamps[b]) - Date.parse(missionEventsTimestamps[a]);
     });
@@ -240,7 +273,7 @@ function Home() {
         missionEventsCore = missionIndices.map((index) => {
             const currentEvent = missionEventsData[index];
             const currentMission = missionData[index];
-            const randomId = Math.floor(Math.random() * 100);
+            const randomId = Math.floor(Math.random() * 100); // ID for a placeholder image.
             return (
                 <motion.div style={{display: "inline-block"}} key={currentEvent.id}
                 initial={{opacity: 0, y: 400}}

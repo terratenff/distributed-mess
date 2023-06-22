@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Carousel, CarouselItem, CarouselControl, CarouselIndicators, CarouselCaption } from 'reactstrap';
 
+/**
+ * Creates a Carousel component for the home page of the application.
+ * @returns Home Carousel.
+ */
 function HomeCarousel() {
 
     const frontItems = [

@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button, ButtonGroup, Container, Table, Alert } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import AppNavbar from './AppNavbar';
 
+/**
+ * Creates the ship list page of the application.
+ * @returns Ship list page.
+ */
 function ShipList() {
 
+    /**
+     * Updates the component with ship entities that are fetched from the application.
+     */
     async function refresh() {
         fetch('/ships')
             .then(response => {
@@ -20,6 +27,10 @@ function ShipList() {
             });
     }
 
+    /**
+     * Removes specified ship from the application.
+     * @param {*} id ID of the ship that is to be deleted.
+     */
     async function remove(id) {
         await fetch(`/ships/${id}`, {
             method: 'DELETE',

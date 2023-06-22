@@ -3,8 +3,16 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Container, Form, FormGroup, Input, Label, Table } from 'reactstrap';
 import AppNavbar from './AppNavbar';
 
+/**
+ * Creates the ship editing page of the application. Also operates as the ship creation page.
+ * @returns Ship editing/creation page.
+ */
 function ShipEdit() {
 
+    /**
+     * Fetches a specific ship from the application and updates the component with it. Alternatively a template ship is used.
+     * @param {*} targetShipId ID of the ship that is to be fetched, or "new", in which case a template is used.
+     */
     async function fetchShip(targetShipId) {
         if (targetShipId !== 'new') {
             const fetchedShip = await (await fetch("/ships/" + targetShipId)).json();
@@ -16,6 +24,10 @@ function ShipEdit() {
         }
     }
 
+    /**
+     * Updates maintained ship entity.
+     * @param {*} event Change event that came from editing a form.
+     */
     function handleChange(event) {
         const target = event.target;
         const value = target.value;
@@ -25,6 +37,10 @@ function ShipEdit() {
         setShip(item);
     }
 
+    /**
+     * Updates maintained ship log entity.
+     * @param {*} event Change event that came from editing a form.
+     */
     function handleLogChange(event) {
         const target = event.target;
         const value = target.value;
@@ -32,6 +48,10 @@ function ShipEdit() {
         setLogEntry(keyValue);
     }
 
+    /**
+     * Validates and sends the contents of the form to the backend for processing, and redirects user back to the ship list page.
+     * @param {*} event Click event.
+     */
     async function handleSubmit(event) {
         event.preventDefault();
 

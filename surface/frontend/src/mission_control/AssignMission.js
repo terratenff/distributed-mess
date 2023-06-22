@@ -4,8 +4,16 @@ import { Button, Container, Form, FormGroup, Input, Label, Row, Col } from 'reac
 import AppNavbar from "./../AppNavbar";
 import spaceship from '../images/spaceship.png';
 
+/**
+ * Creates the mission assigning page of the application.
+ * @returns Mission assignment page.
+ */
 function AssignMission() {
 
+    /**
+     * Fetches a specific ship from the application and updates the component with it.
+     * @param {*} targetShipId ID of the ship that is to be fetched.
+     */
     async function fetchShip(targetShipId) {
         const fetchedShip = await (await fetch("/ships/" + targetShipId)).json();
         setShip(fetchedShip);
@@ -15,6 +23,10 @@ function AssignMission() {
         }
     }
 
+    /**
+     * Sends the contents of the form to the backend for processing, and redirects user back to the mission contrl page.
+     * @param {*} event Click event.
+     */
     async function handleSubmit(event) {
         event.preventDefault();
 
@@ -33,6 +45,10 @@ function AssignMission() {
         navigate("/mission-control?open-ship=" + assignedShip.id);
     }
 
+    /**
+     * Updates maintained mission entity.
+     * @param {*} event Change event that came from editing a form.
+     */
     async function handleChange(event) {
         const target = event.target;
         const varValue = target.value;

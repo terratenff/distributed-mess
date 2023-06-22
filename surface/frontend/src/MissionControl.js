@@ -4,8 +4,15 @@ import { Link, useLocation } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
 
+/**
+ * Creates the mission control page of the application.
+ * @returns Mission control page.
+ */
 function MissionControl() {
 
+    /**
+     * Updates the component with ship entities that are fetched from the application.
+     */
     async function refresh() {
         fetch('/ships')
             .then(response => {
@@ -21,31 +28,53 @@ function MissionControl() {
             });
     }
 
+    /**
+     * Launches specified ship to space.
+     * @param {*} id ID of the ship that is to be launched to space. The ship in question must be assigned to a mission.
+     */
     async function launch(id) {
         await fetch("/ships/" + id + "/launch");
         refresh();
     }
 
+    /**
+     * Launches all ships that have a mission to space.
+     */
     async function launchAll() {
         await fetch("/ships/launch-all");
         refresh();
     }
 
+    /**
+     * Sends specified ship to repairs.
+     * @param {*} id ID of the ship that is to be repaired. The ship in question must be damaged.
+     */
     async function repair(id) {
         await fetch("/ships/" + id + "/repair");
         refresh();
     }
 
+    /**
+     * Decommissions specified ship, making it unusable.
+     * @param {*} id ID of the ship that is to be decommissioned. The ship in question must be available.
+     */
     async function decommission(id) {
         await fetch("/ships/" + id + "/decommission");
         refresh();
     }
 
+    /**
+     * Instructs specified ship to abort its mission and return.
+     * @param {*} id ID of the ship that is to abandon its mission. The ship in question must be executing its mission.
+     */
     async function abort(id) {
         await fetch("/ships/" + id + "/abort");
         refresh();
     }
 
+    /**
+     * Instructs every ship that is executing its mission to abort their activities and return.
+     */
     async function abortAll() {
         await fetch("/ships/abort-all");
         refresh();
@@ -53,6 +82,7 @@ function MissionControl() {
 
     const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
 
+    // Open a specific ship's menu if such a parameter is provided.
     const searchUrl = useLocation().search;
     let openShipId = new URLSearchParams(searchUrl).get("open-ship");
     if (openShipId === null) {
@@ -64,6 +94,10 @@ function MissionControl() {
     const [noConnection, setNoConnection] = useState(true);
     const initialized = useRef(false);
 
+    /**
+     * Operates the accordion component.
+     * @param {*} id ID of the accordion to open.
+     */
     function operateAccordion(id) {
         if (accordionOpen === id) {
             setAccordionOpen();
@@ -85,6 +119,7 @@ function MissionControl() {
         return () => clearInterval(timer);
     });
 
+    // Building the accordion component.
     const shipList = ships.map(ship => {
         const optsM = {"disabled": (ship.status === "READY" ? false : true)};
         const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
@@ -98,6 +133,7 @@ function MissionControl() {
         let missionDetailsIndicator;
         let missionDetails;
         if (ship.mission !== null) {
+            // Ship has a mission, so create a button that shows mission details.
             missionDetailsIndicator = (
                 <Button id={"collapse" + ship.id} style={{float: "left"}}>Mission Details</Button>
             );
@@ -204,6 +240,11 @@ function MissionControl() {
     );
 }
 
+/**
+ * Convenience component for a button that, after pressing, summons a confirmation screen.
+ * @param {*} properties Collection of properties. "onConfirmation" is the intended function.
+ * @returns Confirmation-backed button component.
+ */
 function ConfirmationBackedButton({ onConfirmation, size, color, buttonText, headerText, contents, options }) {
     const [modal, setModal] = useState(false);
     const toggle = () => setModal(!modal);

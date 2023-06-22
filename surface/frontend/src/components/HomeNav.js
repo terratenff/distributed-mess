@@ -2,6 +2,10 @@ import { useState } from "react";
 import { Button, Offcanvas, OffcanvasHeader, OffcanvasBody } from "reactstrap";
 import { HashLink } from "react-router-hash-link";
 
+/**
+ * Creates a button that allows the user to navigate by headers around the home page of the application.
+ * @returns HomeNav button.
+ */
 function HomeNav() {
 
     const [open, setOpen] = useState(false);
