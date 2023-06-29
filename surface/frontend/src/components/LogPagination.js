@@ -26,7 +26,7 @@ function LogPagination({ urlPrefix, limit = 10 }) {
      */
     async function getDataCount() {
         const fetchedData = await (await fetch(urlPrefix)).json();
-        setPageCount(fetchedData.length / limit);
+        setPageCount(Math.ceil(fetchedData.length / limit));
     }
 
     /**
