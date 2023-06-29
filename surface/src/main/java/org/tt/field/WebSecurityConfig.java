@@ -10,6 +10,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Web security configuration for the pages where only "admins" are expected to be.
+ * 
+ * @author terratenff
+ */
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {

@@ -17,6 +17,11 @@ import javax.persistence.Table;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+/**
+ * Ship entity, the core entity of the application.
+ * 
+ * @author terratenff
+ */
 @Entity
 @Table(name = "ship")
 public class Ship {

@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.domain.Event;
 import org.tt.field.repository.EventRepository;
 
+/**
+ * API controller class for the handling of event entities.
+ * 
+ * @author terratenff
+ */
 @RestController
 @RequestMapping("/events")
 public class EventController {
@@ -30,6 +35,13 @@ public class EventController {
         this.eventRepository = eventRepository;
     }
 
+    /**
+     * Getter for event entities.
+     * @param pageStr Optional page number. If provided, limited set of events are returned (examples:
+     * 0 = 1-10, 1 = 11-20, 2 = 21-30). If not provided, all events are returned.
+     * @return Either all events, or 10 events in a paginated manner. In the event of a parsing error,
+     * all events are returned.
+     */
     @GetMapping
     public List<Event> getEvents(@RequestParam(name = "page", required = false) String pageStr) {
         if (pageStr == null) {
@@ -45,11 +57,21 @@ public class EventController {
         }
     }
 
+    /**
+     * @param id Event ID.
+     * @return Event with specified ID.
+     */
     @GetMapping("/{id}")
     public Event getEvent(@PathVariable Long id) {
         return eventRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
+    /**
+     * Adds an event entity. However, it won't be associated with a mission entity.
+     * @param event Event entity to be added.
+     * @return Return value for getting added event.
+     * @throws URISyntaxException
+     */
     @PostMapping
     public ResponseEntity createEvent(@RequestBody Event event) throws URISyntaxException {
         logger.info("An event was added.");
@@ -58,6 +80,12 @@ public class EventController {
         return ResponseEntity.created(new URI("/events/" + savedEvent.getId())).body(savedEvent);
     }
 
+    /**
+     * Edits existing event entity.
+     * @param id Event ID.
+     * @param event Event entity that replaces target event entity.
+     * @return ok.
+     */
     @PutMapping("/{id}")
     public ResponseEntity updateEvent(@PathVariable Long id, @RequestBody Event event) {
         logger.info("An event was edited.");
@@ -70,6 +98,11 @@ public class EventController {
         return ResponseEntity.ok(currentEvent);
     }
 
+    /**
+     * Deletes existing event entity.
+     * @param id Event ID.
+     * @return ok.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteEvent(@PathVariable Long id) {
         logger.info("An event was deleted.");

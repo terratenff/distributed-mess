@@ -15,6 +15,11 @@ import javax.persistence.MapsId;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+/**
+ * Mission entity.
+ * 
+ * @author terratenff
+ */
 @Entity
 @Table(name = "mission")
 public class Mission {

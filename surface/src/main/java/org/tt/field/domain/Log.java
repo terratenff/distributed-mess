@@ -10,6 +10,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+/**
+ * Ship log entity.
+ * 
+ * @author terratenff
+ */
 @Entity
 @Table(name = "log")
 public class Log {
@@ -44,6 +49,11 @@ public class Log {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Sets timestamp from a string.
+     * @param timestamp ISO_OFFSET_DATE_TIME-formatted timestamp is expected.
+     * (Example: 2011-12-03T10:15:30+01:00)
+     */
     public void setTimestamp(String timestamp) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
         LocalDateTime time = LocalDateTime.parse(timestamp, formatter);

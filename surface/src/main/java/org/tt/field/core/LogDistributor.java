@@ -20,10 +20,18 @@ import org.slf4j.LoggerFactory;
 import org.tt.field.domain.Log;
 import org.tt.field.domain.Ship;
 
+/**
+ * Collects and processes log entries for ship entities to use to make ship logs.
+ * 
+ * @author terratenff
+ */
 public class LogDistributor {
 
     private static final Logger logger = LoggerFactory.getLogger(LogDistributor.class);
 
+    /**
+     * Collection of file paths where the log entries are collected from.
+     */
     private static final Map<String, String> FILE_PATHS = Map.ofEntries(
         entry("dry_dock_flavor", "/core/dry_dock_flavor.txt"),
         entry("dry_dock_finish_flavor", "/core/dry_dock_finish_flavor.txt"),
@@ -37,6 +45,10 @@ public class LogDistributor {
     
     private static LogDistributor instance;
 
+    /**
+     * Getter for the singleton instance.
+     * @return LogDistributor.
+     */
     public static LogDistributor getInstance() {
         if (instance == null) {
             instance = new LogDistributor();
@@ -44,9 +56,15 @@ public class LogDistributor {
         return instance;
     }
 
+    /**
+     * Data structure for all the ship logs.
+     */
     private Map<String, List<String>> flavor;
     private Random random;
     
+    /**
+     * LogDistributor constructor. Acts as the initializer.
+     */
     private LogDistributor() {
         logger.info("Initializing log distributor...");
 
@@ -74,10 +92,22 @@ public class LogDistributor {
         }
     }
 
+    /**
+     * Returns a random, unprocessed log entry based on given key.
+     * @param key Determines what kind of log entry to return.
+     * @return Random, unprocessed log entry. (String)
+     */
     public String getFlavor(String key) {
         return flavor.get(key).get(random.nextInt(flavor.get(key).size()));
     }
 
+    /**
+     * Generates a random log entry based on given key. It is completed with information about
+     * the ship entity that it is associated with.
+     * @param ship Ship entity that is associated with the log entry.
+     * @param key Determines what kind of log entry to return.
+     * @return Random log entry. (Log)
+     */
     public Log generateShipLog(Ship ship, String key) {
         String text = getFlavor(key).replace("%%SHIP%%", ship.getName());
         logger.info(ship.getName() + " - Log entry: " + text);

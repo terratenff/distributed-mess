@@ -19,6 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.domain.Log;
 import org.tt.field.repository.LogRepository;
 
+/**
+ * API controller class for the handling of log entities.
+ * 
+ * @author terratenff
+ */
 @RestController
 @RequestMapping("/logs")
 public class LogController {
@@ -30,6 +35,13 @@ public class LogController {
         this.logRepository = logRepository;
     }
 
+    /**
+     * Getter for log entities.
+     * @param pageStr Optional page number. If provided, limited set of logs are returned (examples:
+     * 0 = 1-10, 1 = 11-20, 2 = 21-30). If not provided, all logs are returned.
+     * @return Either all logs, or 10 logs in a paginated manner. In the event of a parsing error,
+     * all logs are returned.
+     */
     @GetMapping
     public List<Log> getLogs(@RequestParam(name = "page", required = false) String pageStr) {
         if (pageStr == null) {
@@ -45,11 +57,21 @@ public class LogController {
         }
     }
 
+    /**
+     * @param id Log ID.
+     * @return Log with specified ID.
+     */
     @GetMapping("/{id}")
     public Log getLog(@PathVariable Long id) {
         return logRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
+    /**
+     * Adds a log entity. However, it won't be associated with a ship entity.
+     * @param log Log entity to be added.
+     * @return Return value for getting added log.
+     * @throws URISyntaxException
+     */
     @PostMapping
     public ResponseEntity createLog(@RequestBody Log log) throws URISyntaxException {
         logger.info("A log was added.");
@@ -58,6 +80,12 @@ public class LogController {
         return ResponseEntity.created(new URI("/logs/" + savedLog.getId())).body(savedLog);
     }
 
+    /**
+     * Edits existing log entity.
+     * @param id Log ID.
+     * @param log Log entity that replaces target log entity.
+     * @return ok.
+     */
     @PutMapping("/{id}")
     public ResponseEntity updateLog(@PathVariable Long id, @RequestBody Log log) {
         logger.info("A log was edited.");
@@ -70,6 +98,11 @@ public class LogController {
         return ResponseEntity.ok(currentLog);
     }
 
+    /**
+     * Deletes existing log entity.
+     * @param id Log ID.
+     * @return ok.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteLog(@PathVariable Long id) {
         logger.info("A log was deleted.");

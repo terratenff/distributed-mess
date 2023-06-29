@@ -12,18 +12,55 @@ import org.slf4j.LoggerFactory;
 import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
 
+/**
+ * Simulator class for ship entities. Ships are simulated to move around the airspace,
+ * either going to or returning from space.
+ * 
+ * @author terratenff
+ */
 public class TransitShip extends Thread {
 
     private static final Logger logger = LoggerFactory.getLogger(TransitShip.class);
+
+    /**
+     * How long the ships remain in airspace.
+     */
     private static final int TRANSIT_TIME = 60000;
+
+    /**
+     * How long the ships wait before trying to connect to space module again.
+     */
     private static final int RETRY_TIME = 10000;
+
+    /**
+     * How many times the ships attempt to connect to space before giving up and returning to surface.
+     */
     private static final int RETRY_CONNECTION_COUNT = 5;
+
+    /**
+     * The probability of ship condition degrading by one.
+     */
     private static final double CONDITION_DEGRADATION_RATE = 0.10;
+
+    /**
+     * How much time must pass before condition degradation is checked. (milliseconds)
+     */
     private static final int CONDITION_DEGRADATION_FREQUENCY = 1000;
 
+    /**
+     * List of active simulated ships.
+     */
     private static List<TransitShip> shipsOnTransit = new ArrayList<TransitShip>();
 
+    /**
+     * Instructs specified ship entity to abort its current mission.
+     * @param ship Ship entity that is to abort its mission.
+     * @return true, if the ship's mission has been aborted (or already was aborted).
+     * false, if the ship in question could not be found.
+     */
     public static boolean abortMission(Ship ship) {
+
+        // Remove inactive transit ships to avoid errors.
         cleanup();
 
         TransitShip targetShip = null;
@@ -42,6 +79,9 @@ public class TransitShip extends Thread {
         }
     }
 
+    /**
+     * Removes all transit ships that are no longer being used (concluded = true).
+     */
     public static void cleanup() {
         int i = 0;
         while (i < shipsOnTransit.size()) {
@@ -54,14 +94,45 @@ public class TransitShip extends Thread {
         }
     }
 
+    /**
+     * The ship entity that the transit ship represents.
+     */
     private Ship ship;
+
+    /**
+     * A function that is expected to save the ship entity to its repository.
+     */
     private Function<Ship, Ship> saveShipToRepository;
+
+    /**
+     * A function that is expected to save the ship entity's mission to its repository.
+     */
     private Function<Mission, Mission> saveMissionToRepository;
+
     private Random random = new Random();
+    
+    /**
+     * Determines whether the ship entity has aborted its mission.
+     */
     private boolean abortMission = false;
+
+    /**
+     * Determines whether the transit ship has concluded its service to the ship entity.
+     * If this is true, the transit ship is removed during a cleanup.
+     */
     private boolean concluded = false;
+
+    /**
+     * Determines whether the ship entity has completed its mission.
+     */
     private boolean missionCompleted = true;
 
+    /**
+     * Transit ship constructor.
+     * @param ship Ship entity that is to be represented.
+     * @param saveShipToRepository Function that must save ship entity to its repository.
+     * @param saveMissionToRepository Function that must save ship entity's mission to its repository.
+     */
     public TransitShip(Ship ship, Function<Ship, Ship> saveShipToRepository, Function<Mission, Mission> saveMissionToRepository) {
         this.ship = ship;
         this.saveShipToRepository = saveShipToRepository;
@@ -76,9 +147,15 @@ public class TransitShip extends Thread {
                 wait(TRANSIT_TIME);
 
                 if (ship.getStatus().equals("OUTBOUND")) {
+
+                    // Transit ship is approaching space.
+
                     boolean continueMission = wait(TRANSIT_TIME);
 
                     if (!continueMission) {
+
+                        // Mission was aborted.
+
                         missionCompleted = false;
                         logger.warn("Ship with ID " + ship.getId() + " has aborted its mission. It is returning now.");
                         ship.setStatus("INBOUND");
@@ -93,10 +170,16 @@ public class TransitShip extends Thread {
                     ship.setStatus("INBOUND");
                     ship = saveShipToRepository.apply(ship);
                 } else if (ship.getStatus().equals("INBOUND")) {
+
+                    // Transit ship is approaching land.
+
                     wait(TRANSIT_TIME);
                     logger.info("Ship with ID " + ship.getId() + " attempting to land.");
                     ship.setStatus("LANDING");
                     ship = saveShipToRepository.apply(ship);
+
+                    // Transit ship is landing.
+
                     wait(TRANSIT_TIME);
                     String shipStatus;
                     if (ship.getCondition() == 0) {
@@ -109,6 +192,12 @@ public class TransitShip extends Thread {
                         logger.info("Ship with ID " + ship.getId() + " has landed.");
                         shipStatus = "READY";
                     }
+
+                    // Transit ship has landed. Ship entity's mission marked as
+                    // completed if it was not aborted.
+
+                    // The mission is moved to past missions regardless of its outcome.
+
                     Mission mission = ship.getMission();
                     mission.setCompleted(missionCompleted);
                     mission.setArrivalTime(Timestamp.from(Instant.now()));
@@ -119,18 +208,26 @@ public class TransitShip extends Thread {
                     ship.setMission(null);
                     ship = saveShipToRepository.apply(ship);
 
+
+                    // Transit ship is no longer needed.
                     concluded = true;
+                    
                     return;
                 }
             }
             
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
     }
 
+    /**
+     * Utility function for waiting. Includes condition degradation checks.
+     * @param time How long must be waited (milliseconds).
+     * @return true, if the mission was not aborted. false otherwise.
+     * @throws InterruptedException
+     */
     private boolean wait(int time) throws InterruptedException {
         for (int i = 0; i < time / CONDITION_DEGRADATION_FREQUENCY; i++) {
             Thread.sleep(CONDITION_DEGRADATION_FREQUENCY);

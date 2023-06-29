@@ -23,6 +23,11 @@ import org.tt.field.domain.Mission;
 import org.tt.field.repository.EventRepository;
 import org.tt.field.repository.MissionRepository;
 
+/**
+ * API controller class for the handling of mission entities.
+ * 
+ * @author terratenff
+ */
 @RestController
 @RequestMapping("/missions")
 public class MissionController {
@@ -36,16 +41,29 @@ public class MissionController {
         this.eventRepository = eventRepository;
     }
     
+    /**
+     * @return Every mission entity.
+     */
     @GetMapping
     public List<Mission> getMissions() {
         return missionRepository.findAll();
     }
 
+    /**
+     * @param id Mission ID.
+     * @return Mission with specified ID.
+     */
     @GetMapping("/{id}")
     public Mission getMission(@PathVariable Long id) {
         return missionRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
+    /**
+     * Adds a mission entity.
+     * @param mission Mission entity to be added.
+     * @return Return value for getting added mission.
+     * @throws URISyntaxException
+     */
     @PostMapping
     public ResponseEntity createMission(@RequestBody Mission mission) throws URISyntaxException {
         logger.info("A mission was added.");
@@ -54,6 +72,12 @@ public class MissionController {
         return ResponseEntity.created(new URI("/missions/" + savedMission.getId())).body(savedMission);
     }
 
+    /**
+     * Edits existing mission entity.
+     * @param id Mission ID.
+     * @param mission Mission entity that replaces target mission entity.
+     * @return ok.
+     */
     @PutMapping("/{id}")
     public ResponseEntity updateMission(@PathVariable Long id, @RequestBody Mission mission) {
         logger.info("A mission was edited.");
@@ -74,6 +98,11 @@ public class MissionController {
         return ResponseEntity.ok(currentMission);
     }
 
+    /**
+     * Deletes existing mission entity.
+     * @param id Mission ID.
+     * @return ok.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteMission(@PathVariable Long id) {
         logger.info("A mission was deleted.");
@@ -82,6 +111,12 @@ public class MissionController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Creates an event entity for existing mission entity.
+     * @param id Mission ID.
+     * @param eventData Contents of the event.
+     * @return ok. (notFound is returned if specified mission could not be found)
+     */
     @PostMapping("/{id}/events")
     public ResponseEntity createEventForMission(@PathVariable Long id, @RequestBody Map<String, String> eventData) {
         Mission mission = missionRepository.findById(id).orElse(null);
