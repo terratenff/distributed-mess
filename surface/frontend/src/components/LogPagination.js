@@ -3,12 +3,11 @@ import { Table, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 
 /**
  * Produces a table with pagination.
- * @param urlPrefix Base url, from which data entries are collected.
+ * @param {*} urlPrefix Base url, from which data entries are collected.
  * They must have the properties "timestamp" and "description".
- * @param limit Determines how many data entries are in a page. Defaults to 10,
+ * @param {*} limit Determines how many data entries are in a page. Defaults to 10,
  * which is used on the back-end.
  * @returns LogPagination component.
- * @todo Known issue: Pagination components may not always render correctly.
  */
 function LogPagination({ urlPrefix, limit = 10 }) {
 
@@ -27,7 +26,7 @@ function LogPagination({ urlPrefix, limit = 10 }) {
      */
     async function getDataCount() {
         const fetchedData = await (await fetch(urlPrefix)).json();
-        pageCount.current = Math.ceil(fetchedData.length / limit);
+        setPageCount(fetchedData.length / limit);
     }
 
     /**
@@ -35,7 +34,7 @@ function LogPagination({ urlPrefix, limit = 10 }) {
      * @param {*} target Target pagination index.
      */
     async function movePagination(target) {
-        if (target >= 0 && target < pageCount.current) {
+        if (target >= 0 && target < pageCount) {
             page.current = target;
             fetchData();
         }
@@ -66,8 +65,8 @@ function LogPagination({ urlPrefix, limit = 10 }) {
     }
 
     const [data, setData] = useState([]);
+    const [pageCount, setPageCount] = useState(0);
     const initialized = useRef(false);
-    const pageCount = useRef(0);
     const page = useRef(0);
 
     useEffect(() => {
@@ -87,7 +86,7 @@ function LogPagination({ urlPrefix, limit = 10 }) {
         );
     });
 
-    const paginationIndices = generatePaginationIndices(page.current, pageCount.current);
+    const paginationIndices = generatePaginationIndices(page.current, pageCount);
     const paginationCore = paginationIndices.map(i => {
         let active = {"active": page.current === i};
         return (
@@ -109,7 +108,7 @@ function LogPagination({ urlPrefix, limit = 10 }) {
                 <PaginationLink next onClick={() => movePagination(page.current + 1)}/>
             </PaginationItem>
             <PaginationItem>
-                <PaginationLink last onClick={() => movePagination(pageCount.current - 1)}/>
+                <PaginationLink last onClick={() => movePagination(pageCount - 1)}/>
             </PaginationItem>
         </Pagination>
     );
