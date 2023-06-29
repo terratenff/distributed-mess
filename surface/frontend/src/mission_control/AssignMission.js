@@ -10,6 +10,12 @@ import spaceship from '../images/spaceship.png';
  */
 function AssignMission() {
 
+    const TITLE_LIMIT = 50;
+    const DESCRIPTION_LIMIT = 255;
+    const COORDINATE_MIN = -1000;
+    const COORDINATE_MAX = 1000;
+    const RADIUS_LIMIT = 1000;
+
     /**
      * Fetches a specific ship from the application and updates the component with it.
      * @param {*} targetShipId ID of the ship that is to be fetched.
@@ -24,11 +30,46 @@ function AssignMission() {
     }
 
     /**
-     * Sends the contents of the form to the backend for processing, and redirects user back to the mission contrl page.
+     * Validates and sends the contents of the form to the backend for processing,
+     * and redirects user back to the mission control page.
      * @param {*} event Click event.
      */
     async function handleSubmit(event) {
         event.preventDefault();
+
+        if (mission.title.length > TITLE_LIMIT) {
+            alert("Mission title length must be " + TITLE_LIMIT + " characters or lower.");
+            return;
+        }
+
+        if (mission.objective !== "Exploration" &&
+            mission.objective !== "Transportation" &&
+            mission.objective !== "Search") {
+            alert("Invalid mission objective.");
+            return;
+        }
+
+        if (mission.description.length > DESCRIPTION_LIMIT) {
+            alert("Mission description length must be " + DESCRIPTION_LIMIT + " characters or lower.");
+            return;
+        }
+
+        if (mission.centerX < COORDINATE_MIN || mission.centerX > COORDINATE_MAX ||
+            mission.centerY < COORDINATE_MIN || mission.centerY > COORDINATE_MAX ||
+            mission.centerZ < COORDINATE_MIN || mission.centerZ > COORDINATE_MAX) {
+            alert("Center coordinates must be within range [" + COORDINATE_MIN + ", " + COORDINATE_MAX + "].");
+            return;
+        }
+
+        if (mission.radius > RADIUS_LIMIT) {
+            alert("Mission radius must be " + RADIUS_LIMIT + " or less.");
+            return;
+        }
+
+        if (mission.radius < 0) {
+            alert("Mission radius cannot be negative.");
+            return;
+        }
 
         const assignedShip = ship;
         assignedShip.mission = mission;

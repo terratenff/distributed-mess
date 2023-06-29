@@ -9,6 +9,10 @@ import AppNavbar from './AppNavbar';
  */
 function ShipEdit() {
 
+    const CONDITION_LIMIT = 500;
+    const NAME_LIMIT = 50;
+    const DESCRIPTION_LIMIT = 255;
+
     /**
      * Fetches a specific ship from the application and updates the component with it. Alternatively a template ship is used.
      * @param {*} targetShipId ID of the ship that is to be fetched, or "new", in which case a template is used.
@@ -55,14 +59,36 @@ function ShipEdit() {
     async function handleSubmit(event) {
         event.preventDefault();
 
-        if (ship.condition > ship.peakCondition || ship.peakCondition > 500) {
-            alert("Peak condition is 500. Current condition must be lower than peak condition.");
+        if (ship.condition > CONDITION_LIMIT || ship.peakCondition > CONDITION_LIMIT) {
+            alert("(Peak) Condition cannot be higher than " + CONDITION_LIMIT + ".");
             return;
         }
 
-        if (ship.name.length > 50) {
-            alert("Ship name length must be 50 characters or lower.");
+        if (ship.condition > ship.peakCondition) {
+            alert("Peak condition cannot be lower than current condition.");
             return;
+        }
+
+        if (ship.condition < 0 || ship.peakCondition < 0) {
+            alert("(Peak) Condition cannot be negative.");
+            return;
+        }
+
+        if (ship.name.length > NAME_LIMIT) {
+            alert("Ship name length must be " + NAME_LIMIT + " characters or lower.");
+            return;
+        }
+
+        if (ship.description.length > DESCRIPTION_LIMIT) {
+            alert("Ship description length must be " + DESCRIPTION_LIMIT + " characters or lower.");
+            return;
+        }
+
+        if (ship.id && logEntry["description"].length > 0) {
+            if (logEntry["description"].length > DESCRIPTION_LIMIT) {
+                alert("Log description length must be " + DESCRIPTION_LIMIT + " characters or lower.");
+                return;
+            }
         }
     
         await fetch('/ships' + (ship.id ? '/' + ship.id : ''), {

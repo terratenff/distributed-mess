@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.core.Drydock;
+import org.tt.field.core.EntityValidation;
 import org.tt.field.core.LaunchSite;
 import org.tt.field.core.TransitShip;
 import org.tt.field.domain.Log;
@@ -112,6 +113,12 @@ public class ShipController {
      */
     @PostMapping
     public ResponseEntity createShip(@RequestBody Ship ship) throws URISyntaxException {
+
+        if (!EntityValidation.validateShip(ship)) {
+            logger.error("Ship creation was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
         logger.info("A ship was added.");
 
         Ship savedShip = shipRepository.save(ship);
@@ -126,9 +133,21 @@ public class ShipController {
      */
     @PutMapping("/{id}")
     public ResponseEntity updateShip(@PathVariable Long id, @RequestBody Ship ship) {
+
+        if (!EntityValidation.validateShip(ship) ||
+            !EntityValidation.validateMission(ship.getMission())) {
+            logger.error("Ship editing was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Ship currentShip = shipRepository.findById(id).orElse(null);
+        if (currentShip == null) {
+            logger.error("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
         logger.info("A ship was edited.");
 
-        Ship currentShip = shipRepository.findById(id).orElseThrow(RuntimeException::new);
         currentShip.setName(ship.getName());
         currentShip.setStatus(ship.getStatus());
         currentShip.setCondition(ship.getCondition());
@@ -149,9 +168,16 @@ public class ShipController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteShip(@PathVariable Long id) {
+
+        Ship ship = shipRepository.findById(id).orElse(null);
+        if (ship == null) {
+            logger.warn("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
         logger.info("A ship was deleted.");
-        
         shipRepository.deleteById(id);
+
         return ResponseEntity.ok().build();
     }
 
@@ -163,15 +189,21 @@ public class ShipController {
      */
     @PostMapping("/{id}/logs")
     public ResponseEntity createLogForShip(@PathVariable Long id, @RequestBody Map<String, String> logData) {
+        
         Ship ship = shipRepository.findById(id).orElse(null);
         if (ship == null) {
             logger.error("Ship with ID " + id + " not found.");
             return ResponseEntity.notFound().build();
         }
 
-        logger.info("A log was created for a ship.");
-
         Log log = new Log(Timestamp.from(Instant.now()), logData.get("description"));
+        
+        if (!EntityValidation.validateLog(log)) {
+            logger.error("Log creation for a ship was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+        
+        logger.info("A log was created for a ship.");
         log = logRepository.save(log);
 
         List<Log> logs = ship.getLogs();
@@ -190,9 +222,11 @@ public class ShipController {
      */
     @GetMapping("/{id}/repair")
     public ResponseEntity sendShipForRepairs(@PathVariable Long id) {
+
         if (!Drydock.getInstance().isInitialized()) {
             Drydock.getInstance().initialize(saveShipToRepository, saveLogToRepository);
         }
+
         Ship ship = shipRepository.findById(id).orElse(null);
         if (ship == null) {
             logger.error("Ship with ID " + id + " not found.");
@@ -214,15 +248,20 @@ public class ShipController {
      */
     @GetMapping("/{id}/decommission")
     public ResponseEntity decommissionShip(@PathVariable Long id) {
+
         Ship ship = shipRepository.findById(id).orElse(null);
         if (ship == null) {
             logger.error("Ship with ID " + id + " not found.");
             return ResponseEntity.notFound().build();
+        } else if (!ship.getStatus().equals("READY") && !ship.getStatus().equals("BROKEN")) {
+            logger.error("Ship with ID " + id + " must be available before it can be decommissioned.");
+            return ResponseEntity.badRequest().build();
         } else {
             logger.info("Ship with ID " + id + " has been decommissioned.");
             ship.setStatus("DECOMMISSIONED");
             shipRepository.save(ship);
         }
+
         return ResponseEntity.ok().build();
     }
 
@@ -234,6 +273,7 @@ public class ShipController {
      */
     @GetMapping("/{id}/launch")
     public ResponseEntity launchShip(@PathVariable Long id) {
+
         if (!LaunchSite.getInstance().isInitialized()) {
             LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
@@ -246,7 +286,8 @@ public class ShipController {
             int position = LaunchSite.getInstance().addToQueue(ship);
             logger.info("Ship with ID " + id + " has been sent to the launch site. Queue number: " + position + ".");
         } else {
-            logger.warn("Ship with ID " + id + " cannot be launched.");
+            logger.error("Ship with ID " + id + " cannot be launched, since it either is not ready or is not assigned to a mission.");
+            return ResponseEntity.badRequest().build();
         }
 
         return ResponseEntity.ok().build();
@@ -258,6 +299,7 @@ public class ShipController {
      */
     @GetMapping("/launch-all")
     public ResponseEntity launchAllShips() {
+
         if (!LaunchSite.getInstance().isInitialized()) {
             LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
@@ -265,7 +307,7 @@ public class ShipController {
         Collection<Ship> assignedShips = shipRepository.findAllAssignedShips();
         if (assignedShips == null || assignedShips.size() == 0) {
             logger.warn("No assigned ships could be found.");
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
         for (Ship ship : assignedShips) {
             if (ship.getStatus().equals("READY")) {
@@ -284,6 +326,7 @@ public class ShipController {
      */
     @GetMapping("/{id}/abort")
     public ResponseEntity abortMission(@PathVariable Long id) {
+
         if (!LaunchSite.getInstance().isInitialized()) {
             LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
@@ -297,7 +340,7 @@ public class ShipController {
             LaunchSite.getInstance().abortMission(ship);
             logger.info("Ship with ID " + id + " has been instructed to abort its mission.");
         } else {
-            logger.warn("Ship with ID " + id + " does not have a mission.");
+            logger.warn("Ship with ID " + id + " does not have a mission to abort.");
         }
 
         return ResponseEntity.ok().build();
@@ -309,6 +352,7 @@ public class ShipController {
      */
     @GetMapping("/abort-all")
     public ResponseEntity abortAllMissions() {
+
         if (!LaunchSite.getInstance().isInitialized()) {
             LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
@@ -316,13 +360,14 @@ public class ShipController {
         Collection<Ship> assignedShips = shipRepository.findAllAssignedShips();
         if (assignedShips == null || assignedShips.size() == 0) {
             logger.warn("No assigned ships could be found.");
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
         for (Ship ship : assignedShips) {
             TransitShip.abortMission(ship);
             LaunchSite.getInstance().abortMission(ship);
             logger.info("Ship with ID " + ship.getId() + " has been instructed to abort its mission.");
         }
+
         return ResponseEntity.ok().build();
     }
 }

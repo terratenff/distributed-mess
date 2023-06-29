@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.tt.field.core.EntityValidation;
 import org.tt.field.domain.Log;
 import org.tt.field.repository.LogRepository;
 
@@ -74,6 +75,12 @@ public class LogController {
      */
     @PostMapping
     public ResponseEntity createLog(@RequestBody Log log) throws URISyntaxException {
+
+        if (!EntityValidation.validateLog(log)) {
+            logger.error("Log creation was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
         logger.info("A log was added.");
 
         Log savedLog = logRepository.save(log);
@@ -88,9 +95,20 @@ public class LogController {
      */
     @PutMapping("/{id}")
     public ResponseEntity updateLog(@PathVariable Long id, @RequestBody Log log) {
+
+        if (!EntityValidation.validateLog(log)) {
+            logger.error("Log editing was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Log currentLog = logRepository.findById(id).orElse(null);
+        if (currentLog == null) {
+            logger.error("Log with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
         logger.info("A log was edited.");
 
-        Log currentLog = logRepository.findById(id).orElseThrow(RuntimeException::new);
         currentLog.setTimestamp(log.getTimestamp());
         currentLog.setDescription(log.getDescription());
         currentLog = logRepository.save(log);
@@ -105,9 +123,16 @@ public class LogController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteLog(@PathVariable Long id) {
-        logger.info("A log was deleted.");
 
+        Log log = logRepository.findById(id).orElse(null);
+        if (log == null) {
+            logger.warn("Log with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
+        logger.info("A log was deleted.");
         logRepository.deleteById(id);
+        
         return ResponseEntity.ok().build();
     }
 }

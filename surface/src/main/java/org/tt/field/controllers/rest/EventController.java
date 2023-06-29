@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.tt.field.core.EntityValidation;
 import org.tt.field.domain.Event;
 import org.tt.field.repository.EventRepository;
 
@@ -74,9 +75,15 @@ public class EventController {
      */
     @PostMapping
     public ResponseEntity createEvent(@RequestBody Event event) throws URISyntaxException {
-        logger.info("An event was added.");
 
+        if (!EntityValidation.validateEvent(event)) {
+            logger.error("Event creation was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        logger.info("An event was added.");
         Event savedEvent = eventRepository.save(event);
+
         return ResponseEntity.created(new URI("/events/" + savedEvent.getId())).body(savedEvent);
     }
 
@@ -88,9 +95,20 @@ public class EventController {
      */
     @PutMapping("/{id}")
     public ResponseEntity updateEvent(@PathVariable Long id, @RequestBody Event event) {
+
+        if (!EntityValidation.validateEvent(event)) {
+            logger.error("Event creation was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Event currentEvent = eventRepository.findById(id).orElse(null);
+        if (currentEvent == null) {
+            logger.error("Event with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
         logger.info("An event was edited.");
 
-        Event currentEvent = eventRepository.findById(id).orElseThrow(RuntimeException::new);
         currentEvent.setTimestamp(event.getTimestamp());
         currentEvent.setDescription(event.getDescription());
         currentEvent = eventRepository.save(event);
@@ -105,9 +123,16 @@ public class EventController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteEvent(@PathVariable Long id) {
-        logger.info("An event was deleted.");
 
+        Event event = eventRepository.findById(id).orElse(null);
+        if (event == null) {
+            logger.warn("Event with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
+        logger.info("An event was deleted.");
         eventRepository.deleteById(id);
+
         return ResponseEntity.ok().build();
     }
 }

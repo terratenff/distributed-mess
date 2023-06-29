@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.tt.field.core.EntityValidation;
 import org.tt.field.domain.Event;
 import org.tt.field.domain.Mission;
 import org.tt.field.repository.EventRepository;
@@ -66,6 +67,12 @@ public class MissionController {
      */
     @PostMapping
     public ResponseEntity createMission(@RequestBody Mission mission) throws URISyntaxException {
+
+        if (!EntityValidation.validateMission(mission)) {
+            logger.error("Mission creation was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
         logger.info("A mission was added.");
 
         Mission savedMission = missionRepository.save(mission);
@@ -80,9 +87,20 @@ public class MissionController {
      */
     @PutMapping("/{id}")
     public ResponseEntity updateMission(@PathVariable Long id, @RequestBody Mission mission) {
+
+        if (!EntityValidation.validateMission(mission)) {
+            logger.error("Mission editing was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Mission currentMission = missionRepository.findById(id).orElse(null);
+        if (currentMission == null) {
+            logger.error("Mission with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
         logger.info("A mission was edited.");
 
-        Mission currentMission = missionRepository.findById(id).orElseThrow(RuntimeException::new);
         currentMission.setTitle(mission.getTitle());
         currentMission.setObjective(mission.getObjective());
         currentMission.setDescription(mission.getDescription());
@@ -105,6 +123,13 @@ public class MissionController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity deleteMission(@PathVariable Long id) {
+
+        Mission currentMission = missionRepository.findById(id).orElse(null);
+        if (currentMission == null) {
+            logger.warn("Mission with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        }
+
         logger.info("A mission was deleted.");
         
         missionRepository.deleteById(id);
@@ -125,9 +150,14 @@ public class MissionController {
             return ResponseEntity.notFound().build();
         }
 
-        logger.info("An event was created for a mission.");
-
         Event event = new Event(Timestamp.from(Instant.now()), eventData.get("description"));
+        
+        if (!EntityValidation.validateEvent(event)) {
+            logger.error("Event creation for a mission was aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        logger.info("An event was created for a mission.");
         event = eventRepository.save(event);
 
         List<Event> events = mission.getEvents();
