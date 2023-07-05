@@ -1,4 +1,4 @@
-import { setupSpace, populateSpace, getSpacePoints } from "./db/dbSpace.js";
+import { setupSpace } from "./db/dbSpace.js";
 import { randomLetters } from "../util.js";
 
 export function initializeSpace() {
@@ -9,14 +9,9 @@ export class Space {
     static useDb = true;
     static spacePoints = [];
 
-    static initialize() {
-        let alreadyInitialized = setupSpace(false);
-        if (alreadyInitialized) {
-            Space.spacePoints = getSpacePoints();
-        } else {
-            Space.#initializeSpacePoints();
-            populateSpace(Space.spacePoints);
-        }
+    static async initialize() {
+        Space.#initializeSpacePoints();
+        setupSpace(Space.spacePoints, true);
     }
 
     static #initializeSpacePoints() {

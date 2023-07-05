@@ -1,75 +1,94 @@
-import mysql from "mysql2";
-
+import { sleep } from "../../util.js";
 import { establishConnection } from "./dbCommon.js";
 
 const TABLE_NAME = "space";
 
-export async function setupSpace(reset) {
+export async function setupSpace(spacePoints, reset) {
+
+    let alreadyInitialized = false;
+    let returnSpacePoints = [];
+
     if (reset === true) {
         resetSpace();
+
+        // NOTE: This is a hacky fix to an issue where sequential operations on
+        // MySQL database could not be accomplished.
+        await sleep(100);
     }
 
-    let sqlStr = `CREATE TABLE ${TABLE_NAME} (name VARCHAR(30), x INTEGER, y INTEGER, z INTEGER, visit_count INTEGER);`;
-    console.log("dbSpace - Initializing space...");
-    let alreadyInitialized = false;
+    alreadyInitialized = await createTable();
 
-    let con = establishConnection();
-
-    con.query(sqlStr, function(err, result) {
-        if (err) {
-            alreadyInitialized = true;
-        };
-    });
-
-    con.end();
-
-    return alreadyInitialized;
+    if (alreadyInitialized) {
+        returnSpacePoints = getSpacePoints();
+    } else {
+        returnSpacePoints = spacePoints;
+        populateSpace(spacePoints);
+    }
 }
 
-export function resetSpace() {
+async function resetSpace() {
     let sqlStr = `DROP TABLE IF EXISTS ${TABLE_NAME};`;
     console.log("dbSpace - Resetting space...");
 
-    let con = establishConnection();
+    let alreadyInitialized = false;
+    let con = await establishConnection();
 
-    con.query(sqlStr, function(err, result) {
-        if (err) {
-            alreadyInitialized = true;
-        };
+    await con.query(sqlStr).then(() => {
+        console.log("Reset done.");
     });
 
     con.end();
+    return alreadyInitialized;
 }
 
-export function populateSpace(spacePoints) {
+async function createTable() {
+    let sqlStr = `CREATE TABLE ${TABLE_NAME} (name VARCHAR(30), x INTEGER, y INTEGER, z INTEGER, visit_count INTEGER);`;
+    console.log("dbSpace - Initializing space...");
+
+    let alreadyInitialized = false;
+    let con = await establishConnection();
+
+    await con.query(sqlStr).catch(() => {
+        console.log("Table exists.");
+        alreadyInitialized = true;
+    }).finally(() => {
+        console.log("Creation done.");
+    });
+
+    con.end();
+    return alreadyInitialized;
+}
+
+async function populateSpace(spacePoints) {
     console.log("dbSpace - Populating space...");
     let sqlStr = `INSERT INTO ${TABLE_NAME} VALUES `;
     spacePoints.forEach(spacePoint => {
-        sqlStr += `('${spacePoint.name}', ${spacePoint.x}, ${spacePoint.y}, ${spacePoint.z}), `;
+        sqlStr += `('${spacePoint.name}', ${spacePoint.x}, ${spacePoint.y}, ${spacePoint.z}, ${spacePoint.visit_count}), `;
     });
     sqlStr += ";";
     sqlStr = sqlStr.replace("), ;", ");");
 
-    let con = establishConnection();
+    let con = await establishConnection();
 
-    con.query(sqlStr, function(err, result) {
-        if (err) throw err;
+    await con.query(sqlStr).catch((err) => {
+        throw err;
+    }).finally(() => {
+        console.log("Population done.");
     });
 
     con.end();
 }
 
-export function getSpacePoints() {
+async function getSpacePoints() {
     console.log("dbSpace - Fetching space...");
     let sqlStr = "SELECT * FROM space;";
 
-    let con = establishConnection();
+    let con = await establishConnection();
 
-    con.query(sqlStr, function(err, result, fields) {
+    let [rows] = await con.query(sqlStr).catch((err) => {
         if (err) throw err;
     });
 
     con.end();
-
-    return [];
+    return rows;
 }

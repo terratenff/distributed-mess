@@ -2,6 +2,8 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export async function initializeShipCollective() {
     ShipCollective.initialize();
+    const SHIP_DATABASE_UPDATE_INTERVAL = 10;
+    let i = 1;
     while (true) {
         await delay(1000);
         const ships = ShipCollective.getInstance().getShips();
@@ -9,6 +11,12 @@ export async function initializeShipCollective() {
             ship.move();
         }
         ShipCollective.getInstance().removeInboundShips();
+
+        if (i >= SHIP_DATABASE_UPDATE_INTERVAL) {
+            i = 1;
+            console.log("Updating ship database...");
+        }
+        i++;
     }
 }
 

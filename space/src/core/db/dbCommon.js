@@ -1,4 +1,6 @@
-import mysql from "mysql2";
+import mysql from "mysql2/promise";
+
+import { Space } from "../space.js";
 
 const HOST = "localhost";
 const PORT = 8004;
@@ -6,8 +8,8 @@ const USER = "sample-user";
 const PASSWORD = "sample-password";
 const DATABASE = "sample-db";
 
-export function establishConnection() {
-    var con = mysql.createConnection({
+export async function establishConnection() {
+    var con = await mysql.createConnection({
         host: HOST,
         port: PORT,
         user: USER,
@@ -15,7 +17,7 @@ export function establishConnection() {
         database: DATABASE
     });
 
-    con.connect(function(err) {
+    await con.connect(function(err) {
         if (err) {
             Space.useDb = false;
             console.log("ERROR: Could not connect to database.");
