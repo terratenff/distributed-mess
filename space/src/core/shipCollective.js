@@ -7,8 +7,8 @@ export async function initializeShipCollective() {
     while (true) {
         await delay(1000);
         const ships = ShipCollective.getInstance().getShips();
-        for (const ship of ships.values()) {
-            ship.move();
+        for (const shipId in ships) {
+            ships[shipId].move();
         }
         ShipCollective.getInstance().removeInboundShips();
 
@@ -24,7 +24,7 @@ export class ShipCollective {
     static #initialized = false;
     static #initializing = false;
     static #collectiveInstance = null;
-    #ships = new Map();
+    #ships = {};
 
     static initialize() {
         if (!ShipCollective.#initialized) {
@@ -47,17 +47,17 @@ export class ShipCollective {
     }
 
     addShip(ship) {
-        if (this.#ships.get(ship.id) !== undefined) {
+        if (this.#ships[ship.id] !== undefined) {
             console.log(`ERROR: Ship with id ${ship.id} already exists.`);
             return;
         }
-        this.#ships.set(ship.id, ship);
+        this.#ships[ship.id] = ship;
         ship.addShipLog(`Ship '${ship.name}' has entered space.`);
         ship.addMissionEvent(`Ship '${ship.name}' has entered space. Its objective is ${ship.mission.objective}.`);
     }
 
     removeShip(ship) {
-        this.#ships.delete(ship.id);
+        delete this.#ships[ship.id];
     }
 
     getShips() {
@@ -65,14 +65,13 @@ export class ShipCollective {
     }
 
     getShip(id) {
-        return this.#ships.get(id);
+        return this.#ships[id];
     }
 
     removeInboundShips() {
-        let ids = this.#ships.keys();
-        for (const id of ids) {
-            if (this.#ships.get(id).status === "INBOUND") {
-                this.#ships.delete(id);
+        for (let id in this.#ships) {
+            if (this.#ships[id].status === "INBOUND") {
+                delete this.#ships[id];
             }
         }
     }
