@@ -3,6 +3,8 @@ import { Mission } from "./mission.js";
 import { currentDate } from "../util.js";
 
 const DETECTION_RANGE = 10.0;
+const SCAN_DETECTION_RANGE = 30.0;
+const SCAN_FREQUENCY = 25;
 
 export class Ship {
     id = 0;
@@ -18,6 +20,7 @@ export class Ship {
     destinations = [];
     distanceToDestination = 0.0;
     prospectiveSpacePoints = [];
+    spacePointScanCounter = 0;
 
     constructor(shipData) {
         this.id = shipData.id;
@@ -109,11 +112,24 @@ export class Ship {
     }
 
     getNearbyProspectiveSpacePoints() {
-        return Space.getNearbyPoints(
-            this.position,
-            DETECTION_RANGE,
-            this.prospectiveSpacePoints
-        );
+        if (this.spacePointScanCounter >= SCAN_FREQUENCY) {
+
+            this.spacePointScanCounter = 0;
+            return Space.getNearbyPoints(
+                this.position,
+                SCAN_DETECTION_RANGE
+            );
+
+        } else {
+
+            ++this.spacePointScanCounter;
+            return Space.getNearbyPoints(
+                this.position,
+                DETECTION_RANGE,
+                this.prospectiveSpacePoints
+            );
+
+        }
     }
 
     isNearDestination() {

@@ -2,7 +2,7 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 
 export async function initializeShipCollective() {
     ShipCollective.initialize();
-    const SHIP_DATABASE_UPDATE_INTERVAL = 10;
+    const SHIP_DATABASE_UPDATE_INTERVAL = 60;
     let i = 1;
     while (true) {
         await delay(1000);

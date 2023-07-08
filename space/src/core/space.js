@@ -11,7 +11,7 @@ export class Space {
 
     static async initialize() {
         Space.#initializeSpacePoints();
-        setupSpace(Space.spacePoints, true);
+        Space.spacePoints = setupSpace(Space.spacePoints, false);
     }
 
     static #initializeSpacePoints() {

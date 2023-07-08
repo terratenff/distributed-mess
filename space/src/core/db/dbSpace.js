@@ -24,6 +24,8 @@ export async function setupSpace(spacePoints, reset) {
         returnSpacePoints = spacePoints;
         populateSpace(spacePoints);
     }
+
+    return returnSpacePoints;
 }
 
 async function resetSpace() {
@@ -87,6 +89,8 @@ async function getSpacePoints() {
 
     let [rows] = await con.query(sqlStr).catch((err) => {
         if (err) throw err;
+    }).finally(() => {
+        console.log("Space fetching done.");
     });
 
     con.end();
