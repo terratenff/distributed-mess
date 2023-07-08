@@ -24,3 +24,14 @@ export function currentDate() {
 
     return dStr;
 }
+
+export function mapReplacer(key, value) {
+    if (value instanceof Map) {
+        return {
+            dataType: 'Map',
+            value: Array.from(value.entries()),
+        };
+    } else {
+        return value;
+    }
+}

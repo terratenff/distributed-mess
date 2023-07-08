@@ -1,4 +1,4 @@
-import { setupSpace } from "./db/dbSpace.js";
+import { setupSpace, updateSpacePointVisit } from "./db/dbSpace.js";
 import { randomLetters } from "../util.js";
 
 export function initializeSpace() {
@@ -28,10 +28,16 @@ export class Space {
         }
     }
 
-    static getNearbyPoints(coordinates, radius) {
+    static getNearbyPoints(coordinates, radius, spacePointSet = null) {
         let nearbyPoints = [];
-        for (var i = 0; i < this.spacePoints.length; i++) {
-            const spacePoint = this.spacePoints[i];
+        let prospectiveSpacePoints = this.spacePoints;
+
+        if (spacePointSet !== undefined && spacePointSet !== null) {
+            prospectiveSpacePoints = spacePointSet;
+        }
+
+        for (var i = 0; i < prospectiveSpacePoints.length; i++) {
+            const spacePoint = prospectiveSpacePoints[i];
             const x1 = coordinates["x"];
             const y1 = coordinates["y"];
             const z1 = coordinates["z"];
@@ -50,5 +56,12 @@ export class Space {
         }
 
         return nearbyPoints;
+    }
+
+    static addVisitCount(spacePoint) {
+        spacePoint.visit_count = spacePoint.visit_count + 1;
+        if (useDb) {
+            updateSpacePointVisit(spacePoint);
+        }
     }
 }

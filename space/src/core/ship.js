@@ -1,5 +1,8 @@
+import { Space } from "./space.js";
 import { Mission } from "./mission.js";
 import { currentDate } from "../util.js";
+
+const DETECTION_RANGE = 10.0;
 
 export class Ship {
     id = 0;
@@ -14,6 +17,7 @@ export class Ship {
     directionVector = {x: 0, y: 0, z: 0};
     destinations = [];
     distanceToDestination = 0.0;
+    prospectiveSpacePoints = [];
 
     constructor(shipData) {
         this.id = shipData.id;
@@ -25,6 +29,7 @@ export class Ship {
         this.logs = shipData.logs;
 
         this.generateDestinations();
+        this.generateProspectiveSpacePoints();
         this.calculateDirectionVector();
     }
 
@@ -77,6 +82,13 @@ export class Ship {
         this.currentDestination = this.destinations[0];
     }
 
+    generateProspectiveSpacePoints() {
+        this.prospectiveSpacePoints = Space.getNearbyPoints(
+            this.mission.center,
+            this.mission.radius
+        );
+    }
+
     calculateDirectionVector() {
         const x1 = this.position["x"];
         const y1 = this.position["y"];
@@ -94,6 +106,14 @@ export class Ship {
         this.directionVector["x"] = (x2 - x1) / d;
         this.directionVector["y"] = (y2 - y1) / d;
         this.directionVector["z"] = (z2 - z1) / d;
+    }
+
+    getNearbyProspectiveSpacePoints() {
+        return Space.getNearbyPoints(
+            this.position,
+            DETECTION_RANGE,
+            this.prospectiveSpacePoints
+        );
     }
 
     isNearDestination() {
@@ -116,7 +136,7 @@ export class Ship {
 
         this.distanceToDestination = d;
 
-        return d < 10.0;
+        return d < DETECTION_RANGE;
     }
 
     move() {
@@ -126,11 +146,26 @@ export class Ship {
         this.position["x"] += this.directionVector["x"];
         this.position["y"] += this.directionVector["y"];
         this.position["z"] += this.directionVector["z"];
+
+        const nearbyPoints = this.getNearbyProspectiveSpacePoints();
         
         if (this.isNearDestination() && this.status === "INBOUND_SPACE") {
+
             this.status = "INBOUND";
             this.addMissionEvent(`Ship '${this.name}' has left space. It is now inbound.`);
+
+        } else if (nearbyPoints.length > 0) {
+
+            const pointCount = nearbyPoints.length;
+            const selectedIndex = Math.floor(Math.random() * 2 * pointCount) - pointCount;
+            const point = this.prospectiveSpacePoints[selectedIndex];
+            this.prospectiveSpacePoints.splice(selectedIndex, 1);
+
+            this.addMissionEvent(`Ship ${this.name} has discovered space point ${point.name}!`);
+            Space.addVisitCount(point);
+
         } else if (this.isNearDestination()) {
+
             const arrivalPoint = this.destinations.shift();
             const coordinateString = `(${arrivalPoint.x}, ${arrivalPoint.y}, ${arrivalPoint.z})`;
 

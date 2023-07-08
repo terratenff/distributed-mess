@@ -92,3 +92,19 @@ async function getSpacePoints() {
     con.end();
     return rows;
 }
+
+export async function updateSpacePointVisit(spacePoint) {
+    console.log("dbSpace - Adding a visit to a space point...");
+    let sqlStr = `UPDATE space SET visit_count = ${spacePoint.visit_count} WHERE name = '${spacePoint.name}'`;
+
+    let con = await establishConnection();
+
+    await con.query(sqlStr).catch((err) => {
+        if (err) throw err;
+        else {
+            console.log(`Visit to ${spacePoint.name} has been recorded. It has been visited ${spacePoint.visit_count} times.`);
+        }
+    });
+
+    con.end();
+}
