@@ -11,7 +11,9 @@ export class Space {
 
     static async initialize() {
         Space.#initializeSpacePoints();
-        Space.spacePoints = setupSpace(Space.spacePoints, false);
+        if (Space.useDb) {
+            Space.spacePoints = await setupSpace(Space.spacePoints, false);
+        }
     }
 
     static #initializeSpacePoints() {
@@ -26,6 +28,10 @@ export class Space {
             spacePoint["visit_count"] = 0;
             this.spacePoints.push(spacePoint);
         }
+    }
+
+    static getPoints() {
+        return this.spacePoints;
     }
 
     static getNearbyPoints(coordinates, radius, spacePointSet = null) {
@@ -60,7 +66,7 @@ export class Space {
 
     static addVisitCount(spacePoint) {
         spacePoint.visit_count = spacePoint.visit_count + 1;
-        if (useDb) {
+        if (Space.useDb) {
             updateSpacePointVisit(spacePoint);
         }
     }

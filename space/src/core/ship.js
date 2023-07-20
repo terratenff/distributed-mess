@@ -2,9 +2,11 @@ import { Space } from "./space.js";
 import { Mission } from "./mission.js";
 import { currentDate } from "../util.js";
 
+const SUBDESTINATION_FACTOR = 5;
 const DETECTION_RANGE = 10.0;
 const SCAN_DETECTION_RANGE = 30.0;
 const SCAN_FREQUENCY = 25;
+const VELOCITY = 5;
 
 export class Ship {
     id = 0;
@@ -55,7 +57,8 @@ export class Ship {
     }
 
     generateDestinations() {
-        for (var i = 0; i < 5; i++) {
+        const subdestinationCount = Math.ceil(this.mission.radius / SUBDESTINATION_FACTOR);
+        for (var i = 0; i < subdestinationCount; i++) {
             while (true) {
                 const x1 = this.mission.center["x"];
                 const y1 = this.mission.center["y"];
@@ -159,9 +162,9 @@ export class Ship {
         if (this.status === "INBOUND") {
             return;
         }
-        this.position["x"] += this.directionVector["x"];
-        this.position["y"] += this.directionVector["y"];
-        this.position["z"] += this.directionVector["z"];
+        this.position["x"] += this.directionVector["x"] * VELOCITY;
+        this.position["y"] += this.directionVector["y"] * VELOCITY;
+        this.position["z"] += this.directionVector["z"] * VELOCITY;
 
         const nearbyPoints = this.getNearbyProspectiveSpacePoints();
         
@@ -177,7 +180,7 @@ export class Ship {
             const point = this.prospectiveSpacePoints[selectedIndex];
             this.prospectiveSpacePoints.splice(selectedIndex, 1);
 
-            this.addMissionEvent(`Ship ${this.name} has discovered space point ${point.name}!`);
+            this.addMissionEvent(`Ship '${this.name}' has discovered space point '${point.name}'!`);
             Space.addVisitCount(point);
 
         } else if (this.isNearDestination()) {

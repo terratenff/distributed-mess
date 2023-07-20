@@ -12,7 +12,7 @@ shipController.get("/", (request, response) => {
 });
 
 shipController.get("/:id([0-9])", (request, response) => {
-
+    response.json(ShipCollective.getInstance().getShips()[request.params.id]);
 });
 
 shipController.post("/", (request, response) => {

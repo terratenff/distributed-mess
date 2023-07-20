@@ -2,6 +2,7 @@ import { initializeShipCollective } from "./core/shipCollective.js";
 import { initializeSpace } from "./core/space.js";
 
 import { shipController } from "./controllers/shipController.js";
+import { spaceController } from "./controllers/spaceController.js";
 
 import express from "express";
 var app = express();
@@ -9,6 +10,7 @@ var app = express();
 var requestCount = 0;
 
 app.use("/ships", shipController);
+app.use("/space", spaceController);
 
 app.use(express.json());
 
