@@ -9,6 +9,9 @@ const SCAN_FREQUENCY = 25;
 const VELOCITY = 5;
 
 export class Ship {
+
+    static useDb = true;
+
     id = 0;
     name = "Sample Ship";
     description = "Sample Ship Description";
@@ -33,8 +36,25 @@ export class Ship {
         this.mission = new Mission(shipData.mission);
         this.logs = shipData.logs;
 
-        this.generateDestinations();
-        this.generateProspectiveSpacePoints();
+        if (shipData.position !== undefined && shipData.position !== null) {
+            this.position = shipData.position;
+        }
+
+        if (shipData.destinations !== undefined && shipData.destinations !== null &&
+            shipData.currentDestination !== undefined && shipData.currentDestination !== null) {
+            this.destinations = shipData.destinations;
+            this.currentDestination = shipData.currentDestination;
+        } else {
+            this.generateDestinations();
+        }
+
+        if (shipData.prospectiveSpacePoints !== undefined &&
+            shipData.prospectiveSpacePoints !== null) {
+            this.prospectiveSpacePoints = shipData.prospectiveSpacePoints;
+        } else {
+            this.generateProspectiveSpacePoints();
+        }
+
         this.calculateDirectionVector();
     }
 
@@ -71,7 +91,7 @@ export class Ship {
                     y: y2,
                     z: z2
                 };
-
+                
                 const d = Math.sqrt(
                     Math.pow(x2 - x1, 2) +
                     Math.pow(y2 - y1, 2) + 
@@ -171,7 +191,7 @@ export class Ship {
         if (this.isNearDestination() && this.status === "INBOUND_SPACE") {
 
             this.status = "INBOUND";
-            this.addMissionEvent(`Ship '${this.name}' has left space. It is now inbound.`);
+            this.addMissionEvent(`Ship ${this.name} has left space. It is now inbound.`);
 
         } else if (nearbyPoints.length > 0) {
 
@@ -180,7 +200,7 @@ export class Ship {
             const point = this.prospectiveSpacePoints[selectedIndex];
             this.prospectiveSpacePoints.splice(selectedIndex, 1);
 
-            this.addMissionEvent(`Ship '${this.name}' has discovered space point '${point.name}'!`);
+            this.addMissionEvent(`Ship ${this.name} has discovered space point ${point.name}!`);
             Space.addVisitCount(point);
 
         } else if (this.isNearDestination()) {
@@ -191,9 +211,9 @@ export class Ship {
             if (this.destinations.length === 0) {
                 this.destinations.push({"x": 0.0, "y": 0.0, "z": 0.0});
                 this.status = "INBOUND_SPACE";
-                this.addMissionEvent(`Ship '${this.name}' has arrived at its final subdestination coordinates ${coordinateString}, and is now returning.`)
+                this.addMissionEvent(`Ship ${this.name} has arrived at its final subdestination coordinates ${coordinateString}, and is now returning.`)
             } else {
-                this.addMissionEvent(`Ship '${this.name}' has arrived at subdestination coordinates ${coordinateString}.`);
+                this.addMissionEvent(`Ship ${this.name} has arrived at subdestination coordinates ${coordinateString}.`);
             }
 
             this.calculateDirectionVector();

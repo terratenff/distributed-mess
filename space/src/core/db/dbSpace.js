@@ -32,15 +32,13 @@ async function resetSpace() {
     let sqlStr = `DROP TABLE IF EXISTS ${TABLE_NAME};`;
     console.log("dbSpace - Resetting space...");
 
-    let alreadyInitialized = false;
     let con = await establishConnection();
 
     await con.query(sqlStr).then(() => {
-        console.log("Reset done.");
+        console.log("dbSpace - Reset done.");
     });
 
     con.end();
-    return alreadyInitialized;
 }
 
 async function createTable() {
@@ -51,10 +49,10 @@ async function createTable() {
     let con = await establishConnection();
 
     await con.query(sqlStr).catch(() => {
-        console.log("Table exists.");
+        console.log("dbSpace - Table exists.");
         alreadyInitialized = true;
     }).finally(() => {
-        console.log("Creation done.");
+        console.log("dbSpace - Creation done.");
     });
 
     con.end();
@@ -75,7 +73,7 @@ async function populateSpace(spacePoints) {
     await con.query(sqlStr).catch((err) => {
         throw err;
     }).finally(() => {
-        console.log("Population done.");
+        console.log("dbSpace - Population done.");
     });
 
     con.end();
@@ -83,14 +81,14 @@ async function populateSpace(spacePoints) {
 
 async function getSpacePoints() {
     console.log("dbSpace - Fetching space...");
-    let sqlStr = "SELECT * FROM space;";
+    let sqlStr = `SELECT * FROM ${TABLE_NAME};`;
 
     let con = await establishConnection();
 
     let [rows] = await con.query(sqlStr).catch((err) => {
         if (err) throw err;
     }).finally(() => {
-        console.log("Space fetching done.");
+        console.log("dbSpace - Space fetching done.");
     });
 
     con.end();
@@ -99,14 +97,14 @@ async function getSpacePoints() {
 
 export async function updateSpacePointVisit(spacePoint) {
     console.log("dbSpace - Adding a visit to a space point...");
-    let sqlStr = `UPDATE space SET visit_count = ${spacePoint.visit_count} WHERE name = '${spacePoint.name}'`;
+    let sqlStr = `UPDATE ${TABLE_NAME} SET visit_count = ${spacePoint.visit_count} WHERE name = '${spacePoint.name}'`;
 
     let con = await establishConnection();
 
     await con.query(sqlStr).catch((err) => {
         if (err) throw err;
         else {
-            console.log(`Visit to ${spacePoint.name} has been recorded. It has been visited ${spacePoint.visit_count} times.`);
+            console.log(`dbSpace - Visit to ${spacePoint.name} has been recorded. It has been visited ${spacePoint.visit_count} times.`);
         }
     });
 
