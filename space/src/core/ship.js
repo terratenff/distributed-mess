@@ -1,12 +1,16 @@
 import { Space } from "./space.js";
 import { Mission } from "./mission.js";
-import { currentDate } from "../util.js";
+import { currentDate, randomInteger } from "../util.js";
+import { createShipLogMessage, createMissionEventMessage } from "./logDistributor.js";
 
 const SUBDESTINATION_FACTOR = 5;
 const DETECTION_RANGE = 10.0;
 const SCAN_DETECTION_RANGE = 30.0;
 const SCAN_FREQUENCY = 25;
 const VELOCITY = 5;
+const CONDITION_DEGRADATION_PROBABILITY = 0.001;
+const SHIP_LOG_PROBABILITY = 0.0001;
+const MISSION_EVENT_PROBABILITY = 0.0001;
 
 export class Ship {
 
@@ -182,6 +186,9 @@ export class Ship {
         if (this.status === "INBOUND") {
             return;
         }
+
+        this.conditionDegradation();
+
         this.position["x"] += this.directionVector["x"] * VELOCITY;
         this.position["y"] += this.directionVector["y"] * VELOCITY;
         this.position["z"] += this.directionVector["z"] * VELOCITY;
@@ -191,17 +198,19 @@ export class Ship {
         if (this.isNearDestination() && this.status === "INBOUND_SPACE") {
 
             this.status = "INBOUND";
-            this.addMissionEvent(`Ship ${this.name} has left space. It is now inbound.`);
+            this.addMissionEvent(`${this.name} has left space. It is now inbound.`);
 
         } else if (nearbyPoints.length > 0) {
 
             const pointCount = nearbyPoints.length;
-            const selectedIndex = Math.floor(Math.random() * 2 * pointCount) - pointCount;
+            const selectedIndex = randomInteger(0, pointCount);
             const point = this.prospectiveSpacePoints[selectedIndex];
             this.prospectiveSpacePoints.splice(selectedIndex, 1);
 
-            this.addMissionEvent(`Ship ${this.name} has discovered space point ${point.name}!`);
-            Space.addVisitCount(point);
+            if (point !== undefined && point !== null) {
+                this.addMissionEvent(`${this.name} has discovered space point ${point.name}! Total visits: ${point.visit_count}.`);
+                Space.addVisitCount(point);
+            }
 
         } else if (this.isNearDestination()) {
 
@@ -211,14 +220,35 @@ export class Ship {
             if (this.destinations.length === 0) {
                 this.destinations.push({"x": 0.0, "y": 0.0, "z": 0.0});
                 this.status = "INBOUND_SPACE";
-                this.addMissionEvent(`Ship ${this.name} has arrived at its final subdestination coordinates ${coordinateString}, and is now returning.`)
+                this.addMissionEvent(`${this.name} has arrived at its final subdestination coordinates ${coordinateString}, and is now returning.`)
             } else {
-                this.addMissionEvent(`Ship ${this.name} has arrived at subdestination coordinates ${coordinateString}.`);
+                this.addMissionEvent(`${this.name} has arrived at subdestination coordinates ${coordinateString}.`);
             }
 
             this.calculateDirectionVector();
             this.currentDestination = this.destinations[0];
 
+        } else {
+            this.generateShipLog();
+            this.generateMissionEvent();
+        }
+    }
+
+    conditionDegradation() {
+        if (Math.random() < CONDITION_DEGRADATION_PROBABILITY && this.condition > 0) {
+            this.condition--;
+        }
+    }
+
+    generateShipLog() {
+        if (Math.random() < SHIP_LOG_PROBABILITY) {
+            this.addShipLog(createShipLogMessage(this));
+        }
+    }
+
+    generateMissionEvent() {
+        if (Math.random() < MISSION_EVENT_PROBABILITY) {
+            this.addMissionEvent(createMissionEventMessage(this));
         }
     }
 }

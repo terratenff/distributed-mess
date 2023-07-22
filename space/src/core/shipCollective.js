@@ -3,12 +3,13 @@ import { Ship } from "./ship.js";
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const SHIP_DATABASE_UPDATE_INTERVAL = 60;
+const LOOP_DELAY = 1000;
 
 export async function initializeShipCollective() {
     await ShipCollective.initialize();
     let i = 1;
     while (true) {
-        await delay(1000);
+        await delay(LOOP_DELAY);
         const ships = ShipCollective.getInstance().getShips();
         for (const shipId in ships) {
             ships[shipId].move();
@@ -60,8 +61,8 @@ export class ShipCollective {
             return;
         }
         this.#ships[ship.id] = ship;
-        ship.addShipLog(`Ship ${ship.name} has entered space.`);
-        ship.addMissionEvent(`Ship ${ship.name} has entered space. Its objective is ${ship.mission.objective}.`);
+        ship.addShipLog(`${ship.name} has entered space.`);
+        ship.addMissionEvent(`${ship.name} has entered space. Its objective is ${ship.mission.objective}.`);
 
         if (Ship.useDb) {
             addDbShip(ship);
