@@ -28,6 +28,7 @@ app.get("/", (request, response) => {
     response.json(generalData);
 });
 
+// Initializing ship and space related functions.
 initializeShipCollective();
 initializeSpace();
 app.listen(3000);

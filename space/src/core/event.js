@@ -1,3 +1,6 @@
+/**
+ * Mission event entity.
+ */
 export class Event {
     id = 0;
     timestamp = null;

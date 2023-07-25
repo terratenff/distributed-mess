@@ -1,8 +1,20 @@
 import { sleep } from "../../util.js";
 import { establishConnection } from "./dbCommon.js";
 
+import { Space } from "../space.js";
+
 const TABLE_NAME = "space";
 
+/**
+ * Initializes space points. If a database is used, initialization is done by fetching
+ * every row and converting them into space points. If database is not used,
+ * 100 randomly generated space points are returned.
+ * @param {Array<object>} spacePoints Space points that are utilized if space table
+ * does not exist, or if a database is not used.
+ * @param {boolean} reset If true, recreates the space table, removing space
+ * point data in the process. This is relevant only if a database is used.
+ * @returns Space points that are saved in a database, or provided space points.
+ */
 export async function setupSpace(spacePoints, reset) {
 
     let alreadyInitialized = false;
@@ -16,18 +28,26 @@ export async function setupSpace(spacePoints, reset) {
         await sleep(100);
     }
 
-    alreadyInitialized = await createTable();
-
-    if (alreadyInitialized) {
-        returnSpacePoints = getSpacePoints();
+    if (Space.useDb) {
+        alreadyInitialized = await createTable();
+    
+        if (alreadyInitialized) {
+            returnSpacePoints = getSpacePoints();
+        } else {
+            returnSpacePoints = spacePoints;
+            populateSpace(spacePoints);
+        }
+        
     } else {
         returnSpacePoints = spacePoints;
-        populateSpace(spacePoints);
     }
 
     return returnSpacePoints;
 }
 
+/**
+ * Removes space point table from the database.
+ */
 async function resetSpace() {
     let sqlStr = `DROP TABLE IF EXISTS ${TABLE_NAME};`;
     console.log("dbSpace - Resetting space...");
@@ -41,6 +61,10 @@ async function resetSpace() {
     con.end();
 }
 
+/**
+ * Creates space table for the database.
+ * @returns true, if the table already existed. false otherwise.
+ */
 async function createTable() {
     let sqlStr = `CREATE TABLE ${TABLE_NAME} (name VARCHAR(30), x INTEGER, y INTEGER, z INTEGER, visit_count INTEGER);`;
     console.log("dbSpace - Initializing space...");
@@ -59,6 +83,10 @@ async function createTable() {
     return alreadyInitialized;
 }
 
+/**
+ * Adds specified space points to the database.
+ * @param {Array<object>} spacePoints Space points to be added.
+ */
 async function populateSpace(spacePoints) {
     console.log("dbSpace - Populating space...");
     let sqlStr = `INSERT INTO ${TABLE_NAME} VALUES `;
@@ -79,6 +107,10 @@ async function populateSpace(spacePoints) {
     con.end();
 }
 
+/**
+ * Fetches every space point from the database.
+ * @returns All rows from table "space".
+ */
 async function getSpacePoints() {
     console.log("dbSpace - Fetching space...");
     let sqlStr = `SELECT * FROM ${TABLE_NAME};`;
@@ -95,6 +127,10 @@ async function getSpacePoints() {
     return rows;
 }
 
+/**
+ * Increments visit count on specified space point.
+ * @param {object} spacePoint Target space point.
+ */
 export async function updateSpacePointVisit(spacePoint) {
     console.log("dbSpace - Adding a visit to a space point...");
     let sqlStr = `UPDATE ${TABLE_NAME} SET visit_count = ${spacePoint.visit_count} WHERE name = '${spacePoint.name}'`;

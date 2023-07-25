@@ -5,11 +5,19 @@ import { Ship } from "../ship.js";
 
 const TABLE_NAME = "ships";
 
+/**
+ * Initializes ships. If a database is used, initialization is done by fetching
+ * every row and converting them into ship entities that continue from where they
+ * left off. If database is not used, empty map of ships is returned.
+ * @param {boolean} reset If true, recreates the ships table, removing ship
+ * data in the process. This is relevant only if a database is used.
+ * @returns Ships that are saved in a database, or an empty map.
+ */
 export async function setupShips(reset) {
     let alreadyInitialized = false;
     let returnShips = {};
 
-    if (reset === true) {
+    if (reset === true && Ship.useDb) {
         resetShips();
 
         // NOTE: This is a hacky fix to an issue where sequential operations on
@@ -17,15 +25,20 @@ export async function setupShips(reset) {
         await sleep(100);
     }
 
-    alreadyInitialized = await createTable();
-
-    if (alreadyInitialized) {
-        returnShips = await getShips();
+    if (Ship.useDb) {
+        alreadyInitialized = await createTable();
+    
+        if (alreadyInitialized) {
+            returnShips = await getShips();
+        }
     }
 
     return returnShips;
 }
 
+/**
+ * Removes ships table from the database.
+ */
 async function resetShips() {
     let sqlStr = `DROP TABLE IF EXISTS ${TABLE_NAME};`;
     console.log("dbShip - Resetting ships...");
@@ -39,6 +52,10 @@ async function resetShips() {
     con.end();
 }
 
+/**
+ * Creates ships table for the database.
+ * @returns true, if the table already existed. false otherwise.
+ */
 async function createTable() {
     console.log("dbShip - Initializing ships...");
     let sqlStr = `CREATE TABLE ${TABLE_NAME} (
@@ -69,7 +86,17 @@ async function createTable() {
     return alreadyInitialized;
 }
 
+/**
+ * Adds a ship entity to the database.
+ * @param {Ship} ship Ship to be added.
+ */
 export async function addShip(ship) {
+
+    if (!Ship.useDb) {
+        console.log("dbShip - Database is not in use. addShip execution is skipped.")
+        return;
+    }
+
     console.log("dbShip - Adding ship...");
     let sqlStr = `INSERT INTO ${TABLE_NAME} (
         id,
@@ -109,7 +136,17 @@ export async function addShip(ship) {
     con.end();
 }
 
+/**
+ * Removes a ship entity from the database.
+ * @param {Ship} ship Ship to be removed. Its ID is used to search and remove.
+ */
 export async function removeShip(ship) {
+
+    if (!Ship.useDb) {
+        console.log("dbShip - Database is not in use. removeShip execution is skipped.")
+        return;
+    }
+
     console.log("dbShip - Removing ship...");
     let sqlStr = `DELETE FROM ${TABLE_NAME} WHERE id = ${ship.id}`;
 
@@ -125,6 +162,10 @@ export async function removeShip(ship) {
     con.end();
 }
 
+/**
+ * Fetches every ship entity from the database.
+ * @returns All rows from table "ships".
+ */
 async function getShips() {
     console.log("dbShip - Fetching Ships...");
     let sqlStr = `SELECT * FROM ${TABLE_NAME};`;
@@ -152,7 +193,18 @@ async function getShips() {
     return results;
 }
 
+/**
+ * Updates selected ships. Ship ID numbers are used to match them.
+ * @param {Map<number, Ship>} ships Ship entities (keys are ships' ID numbers) that
+ * are to be updated.
+ */
 export async function updateShips(ships) {
+
+    if (!Ship.useDb) {
+        console.log("dbShip - Database is not in use. updateShips execution is skipped.")
+        return;
+    }
+
     console.log("dbShip - Updating ships...");
 
     if (ships.length === 0) {

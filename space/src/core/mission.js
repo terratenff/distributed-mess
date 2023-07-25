@@ -1,5 +1,8 @@
 import { currentDate } from "../util.js";
 
+/**
+ * Mission entity. Describes what designated ship is supposed to do.
+ */
 export class Mission {
     id = 0;
     objective = "Exploration";
@@ -18,6 +21,10 @@ export class Mission {
         this.radius = missionData.radius;
     }
 
+    /**
+     * Adds an event for the mission.
+     * @param {string} eventDescription Event message.
+     */
     addEvent(eventDescription) {
         this.events.push({"timestamp": currentDate(), "description": eventDescription});
     }

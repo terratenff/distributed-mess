@@ -1,5 +1,10 @@
 import { randomInteger } from "../util.js";
 
+/**
+ * Generates a random ship log message.
+ * @param {Ship} ship Designated ship.
+ * @returns Ship log for designated ship.
+ */
 export function createShipLogMessage(ship) {
     const i = randomInteger(0, 3);
     switch (i) {
@@ -18,6 +23,11 @@ export function createShipLogMessage(ship) {
     }
 }
 
+/**
+ * Generates a random ship event message.
+ * @param {Ship} ship Designated ship.
+ * @returns Mission event for designated ship.
+ */
 export function createMissionEventMessage(ship) {
     const i = randomInteger(0, 3);
     switch (i) {

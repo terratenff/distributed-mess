@@ -12,6 +12,9 @@ const CONDITION_DEGRADATION_PROBABILITY = 0.001;
 const SHIP_LOG_PROBABILITY = 0.0001;
 const MISSION_EVENT_PROBABILITY = 0.0001;
 
+/**
+ * Ship entity representation. It simulates movement in space.
+ */
 export class Ship {
 
     static useDb = true;
@@ -31,6 +34,23 @@ export class Ship {
     prospectiveSpacePoints = [];
     spacePointScanCounter = 0;
 
+    /**
+     * Ship entity constructor. Generates destinations and prospective space points
+     * if they are not available. Current position is set to (0, 0, 0) if not
+     * defined.
+     * @param {object} shipData Ship data that the entity is to be based on.
+     * The following details are expected:
+     * * id
+     * * name
+     * * description
+     * * condition (not peak condition)
+     * * mission
+     * * logs
+     * * position (defaults to origin coordinates)
+     * * destinations (randomly generated, if missing)
+     * * currentDestinations (randomly generated, if missing)
+     * * prospectiveSpacePoints (generated, if missing)
+     */
     constructor(shipData) {
         this.id = shipData.id;
         this.name = shipData.name;
@@ -62,24 +82,27 @@ export class Ship {
         this.calculateDirectionVector();
     }
 
-    getData() {
-        return {
-            name: this.name,
-            description: this.description,
-            condition: this.condition,
-            mission: this.mission
-        };
-    }
-
+    /**
+     * Adds a mission event for the ship's mission.
+     * @param {string} eventMsg Event message.
+     */
     addMissionEvent(eventMsg) {
         this.mission.addEvent(eventMsg);
         console.log(eventMsg);
     }
 
+    /**
+     * Adds a ship log for the ship.
+     * @param {string} shipLog Log message.
+     */
     addShipLog(shipLog) {
         this.logs.push({"timestamp": currentDate(), "description": shipLog});
     }
 
+    /**
+     * Generates random destination coordinates for the ship to follow.
+     * The greater the mission radius, the more destinations are created.
+     */
     generateDestinations() {
         const subdestinationCount = Math.ceil(this.mission.radius / SUBDESTINATION_FACTOR);
         for (var i = 0; i < subdestinationCount; i++) {
@@ -112,6 +135,10 @@ export class Ship {
         this.currentDestination = this.destinations[0];
     }
 
+    /**
+     * Generates prospective space points. These are the space points that
+     * can be found within the mission area.
+     */
     generateProspectiveSpacePoints() {
         this.prospectiveSpacePoints = Space.getNearbyPoints(
             this.mission.center,
@@ -119,6 +146,10 @@ export class Ship {
         );
     }
 
+    /**
+     * Calculates the unit vector that determines what direction the ship should go.
+     * It will be aimed at the ship's current destination.
+     */
     calculateDirectionVector() {
         const x1 = this.position["x"];
         const y1 = this.position["y"];
@@ -138,9 +169,15 @@ export class Ship {
         this.directionVector["z"] = (z2 - z1) / d;
     }
 
+    /**
+     * Fetches prospective space points that are near the ship, or occasionally
+     * any space point that is caught in a scan.
+     * @returns Space points that are near the ship.
+     */
     getNearbyProspectiveSpacePoints() {
         if (this.spacePointScanCounter >= SCAN_FREQUENCY) {
 
+            // Perform a scan: try to find any nearby space point.
             this.spacePointScanCounter = 0;
             return Space.getNearbyPoints(
                 this.position,
@@ -149,6 +186,7 @@ export class Ship {
 
         } else {
 
+            // Try to find nearby prospective space points.
             ++this.spacePointScanCounter;
             return Space.getNearbyPoints(
                 this.position,
@@ -159,6 +197,12 @@ export class Ship {
         }
     }
 
+    /**
+     * Determines whether ship is near its current destination. Also corrects the ship's
+     * direction vector, if distance to current destination increased from previous
+     * iteration.
+     * @returns true/false.
+     */
     isNearDestination() {
         const x1 = this.position["x"];
         const y1 = this.position["y"];
@@ -182,8 +226,12 @@ export class Ship {
         return d < DETECTION_RANGE;
     }
 
+    /**
+     * Ship movement iteration function.
+     */
     move() {
         if (this.status === "INBOUND") {
+            // Ship has left space. Iteration is unnecessary.
             return;
         }
 
@@ -197,13 +245,15 @@ export class Ship {
         
         if (this.isNearDestination() && this.status === "INBOUND_SPACE") {
 
+            // Ship has arrived at the space entry point (origin coordinates).
             this.status = "INBOUND";
             this.addMissionEvent(`${this.name} has left space. It is now inbound.`);
 
         } else if (nearbyPoints.length > 0) {
 
+            // Ship is near prospective space points.
             const pointCount = nearbyPoints.length;
-            const selectedIndex = randomInteger(0, pointCount);
+            const selectedIndex = randomInteger(0, pointCount); // Select one random space point.
             const point = this.prospectiveSpacePoints[selectedIndex];
             this.prospectiveSpacePoints.splice(selectedIndex, 1);
 
@@ -214,6 +264,7 @@ export class Ship {
 
         } else if (this.isNearDestination()) {
 
+            // Ship has arrived at its current destination. Proceed to move on to the next.
             const arrivalPoint = this.destinations.shift();
             const coordinateString = `(${arrivalPoint.x}, ${arrivalPoint.y}, ${arrivalPoint.z})`;
 
@@ -234,18 +285,27 @@ export class Ship {
         }
     }
 
+    /**
+     * Roll for condition degradation. On success, reduce condition value by 1.
+     */
     conditionDegradation() {
         if (Math.random() < CONDITION_DEGRADATION_PROBABILITY && this.condition > 0) {
             this.condition--;
         }
     }
 
+    /**
+     * Roll for ship log. On success, generate a random ship log.
+     */
     generateShipLog() {
         if (Math.random() < SHIP_LOG_PROBABILITY) {
             this.addShipLog(createShipLogMessage(this));
         }
     }
 
+    /**
+     * Roll for mission event. On success, generate a random mission event.
+     */
     generateMissionEvent() {
         if (Math.random() < MISSION_EVENT_PROBABILITY) {
             this.addMissionEvent(createMissionEventMessage(this));
