@@ -3,7 +3,11 @@ import mysql from "mysql2/promise";
 import { Space } from "../space.js";
 import { Ship } from "../ship.js";
 
-const HOST = "localhost";
+// Development configuration.
+//const HOST = "localhost";
+//const PORT = 8004;
+
+const HOST = "dbs";
 const PORT = 3306;
 const USER = "sample-user";
 const PASSWORD = "sample-password";
