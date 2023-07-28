@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  space:
+    build: .
+    ports:
+      - 8003:3000
+    depends_on:
+      - dbs
+    networks:
+      - dbsnet
+  dbs:
+    image: "mysql"
+    environment:
+      MYSQL_USER: sample-user
+      MYSQL_PASSWORD: sample-password
+      MYSQL_ROOT_PASSWORD: root-password
+      MYSQL_DATABASE: sample-db
+    ports:
+      - 8004:3306
+    networks:
+      - dbsnet
+  
+networks:
+  dbsnet:
+    driver: bridge
+    ipam:
+      driver: default
