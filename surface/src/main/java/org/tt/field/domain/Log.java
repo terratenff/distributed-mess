@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.json.JSONObject;
+
 /**
  * Ship log entity.
  * 
@@ -31,6 +33,17 @@ public class Log {
     public Log(Timestamp timestamp, String description) {
         this.timestamp = timestamp;
         this.description = description;
+    }
+
+    public String toJson() {
+        return toJsonObject().toString();
+    }
+
+    public JSONObject toJsonObject() {
+        JSONObject json = new JSONObject();
+        json.put("description", description);
+        json.put("timestamp", timestamp.toString());
+        return json;
     }
 
     public Long getId() {

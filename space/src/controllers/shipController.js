@@ -11,7 +11,7 @@ shipController.get("/", (request, response) => {
     response.json(ShipCollective.getInstance().getShips());
 });
 
-shipController.get("/:id([0-9])", (request, response) => {
+shipController.get("/:id", (request, response) => {
     response.json(ShipCollective.getInstance().getShips()[request.params.id]);
 });
 

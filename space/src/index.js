@@ -31,4 +31,4 @@ app.get("/", (request, response) => {
 // Initializing ship and space related functions.
 initializeShipCollective();
 initializeSpace();
-app.listen(3000);
+app.listen(3333);

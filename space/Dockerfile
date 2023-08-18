@@ -1,10 +1,10 @@
 # docker build . -t space
-# docker run -p 8080:3000 --name space -d space
+# docker run -p 8003:3333 --name space -d space
 FROM node:18 AS build
 WORKDIR /usr/space
 COPY package*.json ./
 RUN npm install
 
 COPY . .
-EXPOSE 3000
+EXPOSE 3333
 CMD ["node", "src/index.js"]

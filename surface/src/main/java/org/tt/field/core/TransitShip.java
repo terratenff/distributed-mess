@@ -164,17 +164,51 @@ public class TransitShip extends Thread {
                         continue;
                     }
 
-                    // TODO: Contact space module.
+                    // Attempt to connect to space module.
+
+                    boolean enteredSpace = false;
+                    for (int i = 0; i < RETRY_CONNECTION_COUNT; i++) {
+                        wait(RETRY_TIME);
+                        // FIXME: No session.
+                        if (ShipHttpUtility.sendShip(ship)) {
+                            enteredSpace = true;
+                            break;
+                        } else if (i == RETRY_CONNECTION_COUNT - 1) {
+                            logger.warn("Ship with ID " + ship.getId() + " failed to connect to space. "
+                                + "It will try again " + (RETRY_CONNECTION_COUNT - i) + " more times.");
+                        }
+
+                    }
+
+                    if (enteredSpace) {
+
+                        // Transit ship successfully connected to space module.
+
+                        logger.info("Ship with ID " + ship.getId() + " has entered space.");
+                        ship.setStatus("ACTIVE");
+                        ship = saveShipToRepository.apply(ship);
+
+                        // Transit ship is no longer needed.
+
+                        concluded = true;
+
+                        return;
+
+                    } else {
+
+                        // Transit ship failed to connect to space module after multiple attempts.
+
+                        logger.warn("Ship with ID " + ship.getId() + " is unable to enter space. It is making a return trip.");
+                        ship.setStatus("INBOUND");
+                        ship = saveShipToRepository.apply(ship);
+                    }
                     
-                    logger.warn("Ship with ID " + ship.getId() + " is making an unexpected return trip.");
-                    ship.setStatus("INBOUND");
-                    ship = saveShipToRepository.apply(ship);
                 } else if (ship.getStatus().equals("INBOUND")) {
 
                     // Transit ship is approaching land.
 
                     wait(TRANSIT_TIME);
-                    logger.info("Ship with ID " + ship.getId() + " attempting to land.");
+                    logger.info("Ship with ID " + ship.getId() + " is attempting to land.");
                     ship.setStatus("LANDING");
                     ship = saveShipToRepository.apply(ship);
 
@@ -210,6 +244,7 @@ public class TransitShip extends Thread {
 
 
                     // Transit ship is no longer needed.
+
                     concluded = true;
                     
                     return;

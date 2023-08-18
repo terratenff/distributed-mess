@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.json.JSONObject;
+
 /**
  * Mission event entity.
  * 
@@ -31,6 +33,13 @@ public class Event {
     public Event(Timestamp timestamp, String description) {
         this.timestamp = timestamp;
         this.description = description;
+    }
+
+    public String toJson() {
+        JSONObject json = new JSONObject();
+        json.put("description", description);
+        json.put("timestamp", timestamp.toString());
+        return json.toString();
     }
 
     public Long getId() {

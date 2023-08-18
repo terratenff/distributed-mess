@@ -9,11 +9,16 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.MapsId;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Mission entity.
@@ -60,6 +65,29 @@ public class Mission {
         this.arrivalTime = arrivalTime;
         this.currentDestination = currentDestination;
         this.events = events;
+    }
+
+    public String toJson() {
+        JSONObject json = new JSONObject();
+        json.put("id", id);
+        json.put("title", title);
+        json.put("objective", objective);
+        json.put("description", description);
+        json.put("centerX", centerX);
+        json.put("centerY", centerY);
+        json.put("centerZ", centerZ);
+        json.put("radius", radius);
+        json.put("departureTime", departureTime != null ? departureTime.toString() : "null");
+        json.put("arrivalTime", arrivalTime != null ? arrivalTime.toString() : "null");
+        json.put("currentDestination", currentDestination);
+
+        JSONArray array = new JSONArray();
+        for (Event event : events) {
+           array.put(new JSONObject(event.toJson()));
+        }
+        json.put("events", array);
+        
+        return json.toString();
     }
 
     public Long getId() {

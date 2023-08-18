@@ -16,6 +16,8 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Ship entity, the core entity of the application.
@@ -34,7 +36,7 @@ public class Ship {
     @JoinColumn(nullable = true)
     private Mission mission;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.PERSIST)
     @MapsId("id")
     private List<Mission> pastMissions = new ArrayList<Mission>();
 
@@ -60,6 +62,31 @@ public class Ship {
         this.condition = condition;
         this.peakCondition = peakCondition;
         this.description = description;
+    }
+
+    public String toJson() {
+        JSONObject json = new JSONObject();
+        json.put("id", id);
+        json.put("name", name);
+        json.put("status", status);
+        json.put("condition", condition);
+        json.put("peakCondition", peakCondition);
+        json.put("description", description);
+        json.put("mission", new JSONObject(mission.toJson()));
+
+        JSONArray arrayPastMissions = new JSONArray();
+        for (Mission mission : pastMissions) {
+            arrayPastMissions.put(mission.toJson());
+        }
+        json.put("pastMissions", arrayPastMissions);
+
+        JSONArray arrayLogs = new JSONArray();
+        for (Log log : logs) {
+            arrayLogs.put(log.toJsonObject());
+        }
+        json.put("logs", arrayLogs);
+        
+        return json.toString();
     }
 
     public boolean equals(Ship other) {
