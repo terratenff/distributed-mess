@@ -166,19 +166,7 @@ public class TransitShip extends Thread {
 
                     // Attempt to connect to space module.
 
-                    boolean enteredSpace = false;
-                    for (int i = 0; i < RETRY_CONNECTION_COUNT; i++) {
-                        wait(RETRY_TIME);
-                        // FIXME: No session.
-                        if (ShipHttpUtility.sendShip(ship)) {
-                            enteredSpace = true;
-                            break;
-                        } else if (i == RETRY_CONNECTION_COUNT - 1) {
-                            logger.warn("Ship with ID " + ship.getId() + " failed to connect to space. "
-                                + "It will try again " + (RETRY_CONNECTION_COUNT - i) + " more times.");
-                        }
-
-                    }
+                    boolean enteredSpace = sendShipToSpace();
 
                     if (enteredSpace) {
 
@@ -255,6 +243,29 @@ public class TransitShip extends Thread {
             e.printStackTrace();
         }
         
+    }
+
+    /**
+     * Attempts to send Http requests that contains details of the ship,
+     * to the space module a set number of times.
+     * @return true, if the ship was sent successfully. false otherwise.
+     * @throws InterruptedException
+     */
+    private boolean sendShipToSpace() throws InterruptedException {
+        boolean enteredSpace = false;
+        for (int i = 0; i < RETRY_CONNECTION_COUNT; i++) {
+            wait(RETRY_TIME);
+            if (ShipHttpUtility.sendShip(ship)) {
+                enteredSpace = true;
+                break;
+            } else if (i == RETRY_CONNECTION_COUNT - 1) {
+                logger.warn("Ship with ID " + ship.getId() + " failed to connect to space. "
+                    + "It will try again " + (RETRY_CONNECTION_COUNT - i) + " more times.");
+            }
+
+        }
+
+        return enteredSpace;
     }
 
     /**

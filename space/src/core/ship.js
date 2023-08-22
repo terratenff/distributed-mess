@@ -45,7 +45,6 @@ export class Ship {
      * * description
      * * condition (not peak condition)
      * * mission
-     * * logs
      * * position (defaults to origin coordinates)
      * * destinations (randomly generated, if missing)
      * * currentDestinations (randomly generated, if missing)
@@ -58,7 +57,6 @@ export class Ship {
         this.status = "ACTIVE";
         this.condition = shipData.condition;
         this.mission = new Mission(shipData.mission);
-        this.logs = shipData.logs;
 
         if (shipData.position !== undefined && shipData.position !== null) {
             this.position = shipData.position;

@@ -74,6 +74,7 @@ public class Ship {
         json.put("description", description);
         json.put("mission", new JSONObject(mission.toJson()));
 
+        /*
         JSONArray arrayPastMissions = new JSONArray();
         for (Mission mission : pastMissions) {
             arrayPastMissions.put(mission.toJson());
@@ -85,6 +86,7 @@ public class Ship {
             arrayLogs.put(log.toJsonObject());
         }
         json.put("logs", arrayLogs);
+        */
         
         return json.toString();
     }
