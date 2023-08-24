@@ -66,7 +66,7 @@ public class MissionController {
      * @throws URISyntaxException
      */
     @PostMapping
-    public ResponseEntity createMission(@RequestBody Mission mission) throws URISyntaxException {
+    public ResponseEntity<Mission> createMission(@RequestBody Mission mission) throws URISyntaxException {
 
         if (!EntityValidation.validateMission(mission)) {
             logger.error("Mission creation was aborted.");
@@ -86,7 +86,7 @@ public class MissionController {
      * @return ok.
      */
     @PutMapping("/{id}")
-    public ResponseEntity updateMission(@PathVariable Long id, @RequestBody Mission mission) {
+    public ResponseEntity<Mission> updateMission(@PathVariable Long id, @RequestBody Mission mission) {
 
         if (!EntityValidation.validateMission(mission)) {
             logger.error("Mission editing was aborted.");
@@ -122,7 +122,7 @@ public class MissionController {
      * @return ok.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteMission(@PathVariable Long id) {
+    public ResponseEntity<Mission> deleteMission(@PathVariable Long id) {
 
         Mission currentMission = missionRepository.findById(id).orElse(null);
         if (currentMission == null) {
@@ -143,7 +143,7 @@ public class MissionController {
      * @return ok. (notFound is returned if specified mission could not be found)
      */
     @PostMapping("/{id}/events")
-    public ResponseEntity createEventForMission(@PathVariable Long id, @RequestBody Map<String, String> eventData) {
+    public ResponseEntity<String> createEventForMission(@PathVariable Long id, @RequestBody Map<String, String> eventData) {
         Mission mission = missionRepository.findById(id).orElse(null);
         if (mission == null) {
             logger.error("Mission with ID " + id + " not found.");

@@ -74,7 +74,7 @@ public class LogController {
      * @throws URISyntaxException
      */
     @PostMapping
-    public ResponseEntity createLog(@RequestBody Log log) throws URISyntaxException {
+    public ResponseEntity<Log> createLog(@RequestBody Log log) throws URISyntaxException {
 
         if (!EntityValidation.validateLog(log)) {
             logger.error("Log creation was aborted.");
@@ -94,7 +94,7 @@ public class LogController {
      * @return ok.
      */
     @PutMapping("/{id}")
-    public ResponseEntity updateLog(@PathVariable Long id, @RequestBody Log log) {
+    public ResponseEntity<Log> updateLog(@PathVariable Long id, @RequestBody Log log) {
 
         if (!EntityValidation.validateLog(log)) {
             logger.error("Log editing was aborted.");
@@ -122,7 +122,7 @@ public class LogController {
      * @return ok.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteLog(@PathVariable Long id) {
+    public ResponseEntity<String> deleteLog(@PathVariable Long id) {
 
         Log log = logRepository.findById(id).orElse(null);
         if (log == null) {

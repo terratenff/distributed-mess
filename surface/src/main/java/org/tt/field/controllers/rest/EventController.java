@@ -74,7 +74,7 @@ public class EventController {
      * @throws URISyntaxException
      */
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody Event event) throws URISyntaxException {
+    public ResponseEntity<Event> createEvent(@RequestBody Event event) throws URISyntaxException {
 
         if (!EntityValidation.validateEvent(event)) {
             logger.error("Event creation was aborted.");
@@ -94,7 +94,7 @@ public class EventController {
      * @return ok.
      */
     @PutMapping("/{id}")
-    public ResponseEntity updateEvent(@PathVariable Long id, @RequestBody Event event) {
+    public ResponseEntity<Event> updateEvent(@PathVariable Long id, @RequestBody Event event) {
 
         if (!EntityValidation.validateEvent(event)) {
             logger.error("Event creation was aborted.");
@@ -122,7 +122,7 @@ public class EventController {
      * @return ok.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<String> deleteEvent(@PathVariable Long id) {
 
         Event event = eventRepository.findById(id).orElse(null);
         if (event == null) {

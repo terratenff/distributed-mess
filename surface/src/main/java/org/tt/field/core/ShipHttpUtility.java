@@ -3,17 +3,25 @@ package org.tt.field.core;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tt.field.domain.Ship;
 
+/**
+ * Utility class that is used to send a HTTP request to space module.
+ * @author terratenff
+ */
 public class ShipHttpUtility {
 
     private static final Logger logger = LoggerFactory.getLogger(ShipHttpUtility.class);
     
+    /**
+     * Sends a ship to space module.
+     * @param ship
+     * @return true, if response code is OK.
+     */
     public static boolean sendShip(Ship ship) {
         try {
             URL url = new URL("http://localhost:8003/ships");
@@ -37,11 +45,7 @@ public class ShipHttpUtility {
 
             return responseCode >= 200 && responseCode < 300;
             
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

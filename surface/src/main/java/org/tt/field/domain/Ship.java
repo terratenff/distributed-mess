@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -16,7 +15,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -73,20 +71,6 @@ public class Ship {
         json.put("peakCondition", peakCondition);
         json.put("description", description);
         json.put("mission", new JSONObject(mission.toJson()));
-
-        /*
-        JSONArray arrayPastMissions = new JSONArray();
-        for (Mission mission : pastMissions) {
-            arrayPastMissions.put(mission.toJson());
-        }
-        json.put("pastMissions", arrayPastMissions);
-
-        JSONArray arrayLogs = new JSONArray();
-        for (Log log : logs) {
-            arrayLogs.put(log.toJsonObject());
-        }
-        json.put("logs", arrayLogs);
-        */
         
         return json.toString();
     }

@@ -30,6 +30,8 @@ public class GeneralController {
 
     @GetMapping(HOME)
     public ModelAndView index(final HttpServletRequest request) {
+        logger.info(String.format("Navigated to '%s'.", HOME));
+
         ModelAndView mav = new ModelAndView();
         mav.setViewName("base");
         mav.addObject("pageContext", "index");
@@ -39,6 +41,8 @@ public class GeneralController {
 
     @GetMapping(LOGIN)
     public ModelAndView login(final HttpServletRequest request) {
+        logger.info(String.format("Navigated to '%s'.", LOGIN));
+        
         ModelAndView mav = new ModelAndView();
         mav.setViewName("login_page");
 
@@ -47,6 +51,8 @@ public class GeneralController {
 
     @GetMapping(MISSION_CONTROL)
     public ModelAndView missionControl(final HttpServletRequest request) {
+        logger.info(String.format("Navigated to '%s'.", MISSION_CONTROL));
+        
         ModelAndView mav = new ModelAndView();
         mav.setViewName("base");
         mav.addObject("pageContext", "mission_control");
@@ -56,6 +62,8 @@ public class GeneralController {
 
     @GetMapping(RESOURCES)
     public ModelAndView resources(final HttpServletRequest request) {
+        logger.info(String.format("Navigated to '%s'.", RESOURCES));
+        
         ModelAndView mav = new ModelAndView();
         mav.setViewName("base");
         mav.addObject("pageContext", "resources");
@@ -65,6 +73,8 @@ public class GeneralController {
 
     @GetMapping(INBOUND_SHIPS)
     public ModelAndView inboundShips(final HttpServletRequest request) {
+        logger.info(String.format("Navigated to '%s'.", INBOUND_SHIPS));
+        
         ModelAndView mav = new ModelAndView();
         mav.setViewName("base");
         mav.addObject("pageContext", "inbound_ships");
@@ -74,6 +84,8 @@ public class GeneralController {
 
     @GetMapping(OUTBOUND_SHIPS)
     public ModelAndView outboundShips(final HttpServletRequest request) {
+        logger.info(String.format("Navigated to '%s'.", OUTBOUND_SHIPS));
+        
         ModelAndView mav = new ModelAndView();
         mav.setViewName("base");
         mav.addObject("pageContext", "outbound_ships");
@@ -83,6 +95,8 @@ public class GeneralController {
 
     @GetMapping(ACTIVE_SHIPS)
     public ModelAndView activeShips(final HttpServletRequest request) {
+        logger.info(String.format("Navigated to '%s'.", ACTIVE_SHIPS));
+        
         ModelAndView mav = new ModelAndView();
         mav.setViewName("base");
         mav.addObject("pageContext", "active_ships");
