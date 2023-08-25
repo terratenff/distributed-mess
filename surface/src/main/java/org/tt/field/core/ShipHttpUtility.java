@@ -1,10 +1,12 @@
 package org.tt.field.core;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +26,8 @@ public class ShipHttpUtility {
      * @return true, if response code is OK.
      */
     public static boolean sendShip(Ship ship) {
-        String spaceUrl = "localhost:8003";
         try {
+            String spaceUrl = getSpaceUrl();
             URL url = new URL("http://" + spaceUrl + "/ships");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -54,5 +56,13 @@ public class ShipHttpUtility {
         }
 
         return false;
+    }
+
+    private static String getSpaceUrl() throws IOException {
+        Properties props = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = loader.getResourceAsStream("application.properties");
+        props.load(stream);
+        return props.getProperty("space.url");
     }
 }
