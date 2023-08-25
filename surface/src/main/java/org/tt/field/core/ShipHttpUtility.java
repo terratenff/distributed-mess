@@ -2,6 +2,7 @@ package org.tt.field.core;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -16,20 +17,21 @@ import org.tt.field.domain.Ship;
 public class ShipHttpUtility {
 
     private static final Logger logger = LoggerFactory.getLogger(ShipHttpUtility.class);
-    
+
     /**
      * Sends a ship to space module.
      * @param ship
      * @return true, if response code is OK.
      */
     public static boolean sendShip(Ship ship) {
+        String spaceUrl = "localhost:8003";
         try {
-            URL url = new URL("http://localhost:8003/ships");
+            URL url = new URL("http://" + spaceUrl + "/ships");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Host", "localhost:8003");
+            conn.setRequestProperty("Host", spaceUrl);
             conn.setConnectTimeout(5000);
             conn.setReadTimeout(5000);
             conn.setDoOutput(true);
@@ -45,6 +47,8 @@ public class ShipHttpUtility {
 
             return responseCode >= 200 && responseCode < 300;
             
+        } catch (ConnectException e) {
+            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }

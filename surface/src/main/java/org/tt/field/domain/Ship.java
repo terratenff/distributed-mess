@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -34,7 +35,7 @@ public class Ship {
     @JoinColumn(nullable = true)
     private Mission mission;
 
-    @OneToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @MapsId("id")
     private List<Mission> pastMissions = new ArrayList<Mission>();
 
