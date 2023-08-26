@@ -3,6 +3,7 @@ import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, Accord
 import { Link, useLocation } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
+import AppFooter from "./AppFooter";
 
 /**
  * Creates the mission control page of the application.
@@ -211,7 +212,7 @@ function MissionControl() {
     return (
         <div>
             <AppNavbar/>
-            <Container fluid>
+            <Container fluid className="page-fill">
                 {noConnection ? NO_CONNECTION_JSX : ""}
                 <h3>Mission Control</h3>
                 <div>
@@ -236,6 +237,7 @@ function MissionControl() {
                     {shipList}
                 </Accordion>
             </Container>
+            <AppFooter/>
         </div>
     );
 }

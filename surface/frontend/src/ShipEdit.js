@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Container, Form, FormGroup, Input, Label, Table } from 'reactstrap';
 import AppNavbar from './AppNavbar';
+import AppFooter from './AppFooter';
 
 /**
  * Creates the ship editing page of the application. Also operates as the ship creation page.
@@ -169,7 +170,7 @@ function ShipEdit() {
     return (
         <div>
             <AppNavbar/>
-            <Container>
+            <Container className="page-fill">
                 {title}
                 <Form onSubmit={handleSubmit}>
                     <FormGroup>
@@ -206,6 +207,7 @@ function ShipEdit() {
                 </Form>
                 {previousLogs}
             </Container>
+            <AppFooter/>
         </div>
     );
 }

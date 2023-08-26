@@ -20,3 +20,7 @@
 .left-aligned {
   text-align: left;
 }
+
+.page-fill {
+  min-height: 100vh;
+}

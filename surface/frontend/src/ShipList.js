@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button, ButtonGroup, Container, Table, Alert } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import AppNavbar from './AppNavbar';
+import AppFooter from './AppFooter';
 
 /**
  * Creates the ship list page of the application.
@@ -84,7 +85,7 @@ function ShipList() {
     return (
         <div>
             <AppNavbar/>
-            <Container fluid>
+            <Container fluid className="page-fill">
                 {noConnection ? NO_CONNECTION_JSX : ""}
                 <h3>Shipyard</h3>
                 <div>
@@ -105,6 +106,7 @@ function ShipList() {
                     </tbody>
                 </Table>
             </Container>
+            <AppFooter/>
         </div>
     );
 }

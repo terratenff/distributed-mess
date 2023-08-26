@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Container, Form, FormGroup, Input, Label, Row, Col } from 'reactstrap';
 import AppNavbar from "./../AppNavbar";
 import spaceship from '../images/spaceship.png';
+import AppFooter from "../AppFooter";
 
 /**
  * Creates the mission assigning page of the application.
@@ -132,7 +133,7 @@ function AssignMission() {
     return (
         <div>
             <AppNavbar/>
-            <Container>
+            <Container className="page-fill">
                 <h3>Assign Mission</h3>
                 <div style={{display: "inline-flex", textAlign: "left", width: 100 + "%"}}>
                     <img src={spaceship} alt="spaceship.png" style={{maxHeight: 100 + "px"}}></img>
@@ -193,6 +194,7 @@ function AssignMission() {
                     </FormGroup>
                 </Form>
             </Container>
+            <AppFooter/>
         </div>
     );
 }
