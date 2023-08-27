@@ -130,6 +130,10 @@ function AssignMission() {
         fetchShip(shipId.id);
     }, [shipId.id]);
 
+    useEffect(() => {
+        window.scrollTo(0, -999);
+    });
+
     return (
         <div>
             <AppNavbar/>
