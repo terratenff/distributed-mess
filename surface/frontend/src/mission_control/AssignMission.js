@@ -113,7 +113,7 @@ function AssignMission() {
     const [mission, setMission] = useState({
         title: "",
         objective: "Exploration",
-        description: null,
+        description: "",
         centerX: 0.0,
         centerY: 0.0,
         centerZ: 0.0,
@@ -128,11 +128,8 @@ function AssignMission() {
 
     useEffect(() => {
         fetchShip(shipId.id);
-    }, [shipId.id]);
-
-    useEffect(() => {
         window.scrollTo(0, -999);
-    });
+    }, [shipId.id]);
 
     return (
         <div>

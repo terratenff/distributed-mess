@@ -131,11 +131,8 @@ function ShipEdit() {
 
     useEffect(() => {
         fetchShip(shipId.id)
-    }, [shipId.id]);
-
-    useEffect(() => {
         window.scrollTo(0, -999);
-    });
+    }, [shipId.id]);
 
     const title = <h2>{ship.id ? 'Edit Ship' : 'Add Ship'}</h2>;
     const logField = ship.id ? (
