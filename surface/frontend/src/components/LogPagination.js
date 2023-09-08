@@ -17,7 +17,7 @@ function LogPagination({ urlPrefix, limit = 10 }) {
      */
     async function fetchData() {
         const fetchedData = await (await fetch(urlPrefix + "?page=" + page.current)).json();
-        setData(fetchedData.reverse());
+        setData(fetchedData);
     }
 
     /**
