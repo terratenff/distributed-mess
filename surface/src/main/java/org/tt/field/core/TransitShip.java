@@ -258,9 +258,9 @@ public class TransitShip extends Thread {
             if (ShipHttpUtility.sendShip(ship)) {
                 enteredSpace = true;
                 break;
-            } else if (i == RETRY_CONNECTION_COUNT - 1) {
+            } else if (i != RETRY_CONNECTION_COUNT - 1) {
                 logger.warn("Ship with ID " + ship.getId() + " failed to connect to space. "
-                    + "It will try again " + (RETRY_CONNECTION_COUNT - i) + " more times.");
+                    + "Remaining attempts: " + (RETRY_CONNECTION_COUNT - i - 1));
             }
 
         }

@@ -50,12 +50,11 @@ public class ShipHttpUtility {
             return responseCode >= 200 && responseCode < 300;
             
         } catch (ConnectException e) {
-            e.printStackTrace();
+            return false;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
     private static String getSpaceUrl() throws IOException {
