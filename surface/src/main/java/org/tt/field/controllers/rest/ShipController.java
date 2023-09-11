@@ -134,8 +134,7 @@ public class ShipController {
     @PutMapping("/{id}")
     public ResponseEntity<Ship> updateShip(@PathVariable Long id, @RequestBody Ship ship) {
 
-        if (!EntityValidation.validateShip(ship) || (ship.getMission() != null &&
-            !EntityValidation.validateMission(ship.getMission()))) {
+        if (!EntityValidation.validateShip(ship)) {
             logger.error("Ship editing was aborted.");
             return ResponseEntity.badRequest().build();
         }
@@ -217,22 +216,28 @@ public class ShipController {
     /**
      * Sends specified ship entity to dry dock for repairs. If the ship does not
      * need repairs, nothing is done. A ship can only be repaired if it is "READY".
-     * @param id Ship ID.
+     * @param ship Ship.
      * @return ok. (notFound is returned if specified ship could not be found)
      */
-    @GetMapping("/{id}/repair")
-    public ResponseEntity<String> sendShipForRepairs(@PathVariable Long id) {
+    @PostMapping("/repair")
+    public ResponseEntity<String> sendShipForRepairs(@RequestBody Ship ship) {
 
         if (!Drydock.getInstance().isInitialized()) {
             Drydock.getInstance().initialize(saveShipToRepository, saveLogToRepository);
         }
 
-        Ship ship = shipRepository.findById(id).orElse(null);
-        if (ship == null) {
+        if (!EntityValidation.validateShip(ship)) {
+            logger.error("Ship repairs were aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Long id = ship.getId();
+        Ship targetShip = shipRepository.findById(id).orElse(null);
+        if (targetShip == null) {
             logger.error("Ship with ID " + id + " not found.");
             return ResponseEntity.notFound().build();
-        } else if (ship.getStatus().equals("READY") || ship.getStatus().equals("BROKEN")) {
-            int position = Drydock.getInstance().addToQueue(ship);
+        } else if (targetShip.getStatus().equals("READY") || targetShip.getStatus().equals("BROKEN")) {
+            int position = Drydock.getInstance().addToQueue(targetShip);
             logger.info("Ship with ID " + id + " has been sent to the drydock for repairs. Queue number: " + position + ".");
         } else {
             logger.warn("Ship with ID " + id + " does not need repairs.");
@@ -243,23 +248,30 @@ public class ShipController {
 
     /**
      * Decommissions specified ship, making it unusable.
-     * @param id Ship ID.
+     * @param ship Ship.
      * @return ok. (notFound is returned if specified ship could not be found)
      */
-    @GetMapping("/{id}/decommission")
-    public ResponseEntity<String> decommissionShip(@PathVariable Long id) {
+    @PostMapping("/decommission")
+    public ResponseEntity<String> decommissionShip(@RequestBody Ship ship) {
 
-        Ship ship = shipRepository.findById(id).orElse(null);
-        if (ship == null) {
+        if (!EntityValidation.validateShip(ship)) {
+            logger.error("Ship decommission aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Long id = ship.getId();
+        Ship targetShip = shipRepository.findById(id).orElse(null);
+        if (targetShip == null) {
             logger.error("Ship with ID " + id + " not found.");
             return ResponseEntity.notFound().build();
-        } else if (!ship.getStatus().equals("READY") && !ship.getStatus().equals("BROKEN")) {
+        } else if (!targetShip.getStatus().equals("READY") &&
+                   !targetShip.getStatus().equals("BROKEN")) {
             logger.error("Ship with ID " + id + " must be available before it can be decommissioned.");
             return ResponseEntity.badRequest().build();
         } else {
             logger.info("Ship with ID " + id + " has been decommissioned.");
-            ship.setStatus("DECOMMISSIONED");
-            shipRepository.save(ship);
+            targetShip.setStatus("DECOMMISSIONED");
+            shipRepository.save(targetShip);
         }
 
         return ResponseEntity.ok().build();
@@ -268,22 +280,29 @@ public class ShipController {
     /**
      * Sends specified ship to the launch site, where it will wait for launch.
      * A ship can only be sent to the launch site if it is "READY" and assigned to a mission.
-     * @param id Ship ID.
+     * @param ship Ship.
      * @return ok. (notFound is returned if specified ship could not be found)
      */
-    @GetMapping("/{id}/launch")
-    public ResponseEntity<String> launchShip(@PathVariable Long id) {
+    @PostMapping("/launch")
+    public ResponseEntity<String> launchShip(@RequestBody Ship ship) {
 
         if (!LaunchSite.getInstance().isInitialized()) {
             LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
 
-        Ship ship = shipRepository.findById(id).orElse(null);
-        if (ship == null) {
+        if (!EntityValidation.validateShip(ship)) {
+            logger.error("Ship launch aborted.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Long id = ship.getId();
+        Ship targetShip = shipRepository.findById(id).orElse(null);
+        if (targetShip == null) {
             logger.error("Ship with ID " + id + " not found.");
             return ResponseEntity.notFound().build();
-        } else if (ship.getStatus().equals("READY") && ship.getMission() != null) {
-            int position = LaunchSite.getInstance().addToQueue(ship);
+        } else if (targetShip.getStatus().equals("READY") &&
+                   targetShip.getMission() != null) {
+            int position = LaunchSite.getInstance().addToQueue(targetShip);
             logger.info("Ship with ID " + id + " has been sent to the launch site. Queue number: " + position + ".");
         } else {
             logger.error("Ship with ID " + id + " cannot be launched, since it either is not ready or is not assigned to a mission.");
@@ -297,7 +316,7 @@ public class ShipController {
      * Sends every assigned and "READY" ship to the launch site, where they will wait for launch.
      * @return ok. (notFound is returned if there are no ships with assigned missions available)
      */
-    @GetMapping("/launch-all")
+    @PostMapping("/launch-all")
     public ResponseEntity<String> launchAllShips() {
 
         if (!LaunchSite.getInstance().isInitialized()) {
@@ -321,23 +340,29 @@ public class ShipController {
     /**
      * Instructs specified ship to abort its mission. Nothing is done if the ship does not have an
      * assigned mission.
-     * @param id Ship ID.
+     * @param ship Ship.
      * @return ok. (notFound is returned if specified ship could not be found)
      */
-    @GetMapping("/{id}/abort")
-    public ResponseEntity<String> abortMission(@PathVariable Long id) {
+    @PostMapping("/abort")
+    public ResponseEntity<String> abortMission(@RequestBody Ship ship) {
 
         if (!LaunchSite.getInstance().isInitialized()) {
             LaunchSite.getInstance().initialize(saveShipToRepository, saveMissionToRepository, saveLogToRepository);
         }
 
-        Ship ship = shipRepository.findById(id).orElse(null);
-        if (ship == null) {
+        if (!EntityValidation.validateShip(ship)) {
+            logger.error("Mission abort operation cancelled.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Long id = ship.getId();
+        Ship targetShip = shipRepository.findById(id).orElse(null);
+        if (targetShip == null) {
             logger.error("Ship with ID " + id + " not found.");
             return ResponseEntity.notFound().build();
-        } else if (ship.getMission() != null) {
-            TransitShip.abortMission(ship);
-            LaunchSite.getInstance().abortMission(ship);
+        } else if (targetShip.getMission() != null) {
+            TransitShip.abortMission(targetShip);
+            LaunchSite.getInstance().abortMission(targetShip);
             logger.info("Ship with ID " + id + " has been instructed to abort its mission.");
         } else {
             logger.warn("Ship with ID " + id + " does not have a mission to abort.");
@@ -350,7 +375,7 @@ public class ShipController {
      * Instructs every assigned ship to abort their missions.
      * @return ok. (notFound is returned if there are no ships with assigned missions available)
      */
-    @GetMapping("/abort-all")
+    @PostMapping("/abort-all")
     public ResponseEntity<String> abortAllMissions() {
 
         if (!LaunchSite.getInstance().isInitialized()) {

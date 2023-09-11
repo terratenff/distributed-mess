@@ -41,6 +41,11 @@ public class EntityValidation {
 
         boolean valid = true;
 
+        if (ship == null) {
+            logger.error("Ship is null.");
+            return false;
+        }
+
         boolean validCondition = ship.getCondition() <= SHIP_CONDITION_LIMIT &&
                                      ship.getPeakCondition() <= SHIP_CONDITION_LIMIT;
         
@@ -52,6 +57,11 @@ public class EntityValidation {
         boolean validName = ship.getName().length() <= SHIP_NAME_LIMIT;
 
         boolean validDescription = ship.getDescription() == null || ship.getDescription().length() <= SHIP_DESCRIPTION_LIMIT;
+
+        boolean validMission = true;
+        if (ship.getMission() != null) {
+            validMission = validateMission(ship.getMission());
+        }
 
         if (!validCondition) {
             logger.error("Peak condition is exceeded: " + SHIP_CONDITION_LIMIT + " vs. "
@@ -82,6 +92,11 @@ public class EntityValidation {
             valid = false;
         }
 
+        if (!validMission) {
+            logger.error("Ship mission is invalid.");
+            valid = false;
+        }
+
         return valid;
     }
 
@@ -93,6 +108,11 @@ public class EntityValidation {
     public static boolean validateMission(Mission mission) {
 
         boolean valid = true;
+
+        if (mission == null) {
+            logger.error("Mission is null.");
+            return false;
+        }
 
         boolean validMissionObjective = false;
         for (String missionObjective : MISSION_VALID_OBJECTIVES) {
@@ -177,6 +197,11 @@ public class EntityValidation {
 
         boolean valid = true;
 
+        if (log == null) {
+            logger.error("Log is null.");
+            return false;
+        }
+
         boolean validDescription = log.getDescription().length() <= MISSION_DESCRIPTION_LIMIT;
 
         if (!validDescription) {
@@ -196,6 +221,11 @@ public class EntityValidation {
     public static boolean validateEvent(Event event) {
 
         boolean valid = true;
+
+        if (event == null) {
+            logger.error("Event is null.");
+            return false;
+        }
 
         boolean validDescription = event.getDescription().length() <= MISSION_DESCRIPTION_LIMIT;
 

@@ -31,10 +31,17 @@ function MissionControl() {
 
     /**
      * Launches specified ship to space.
-     * @param {*} id ID of the ship that is to be launched to space. The ship in question must be assigned to a mission.
+     * @param {*} ship Ship that is to be launched to space. The ship in question must be assigned to a mission.
      */
-    async function launch(id) {
-        await fetch("/ships/" + id + "/launch");
+    async function launch(ship) {
+        await fetch("/ships/launch", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ship),
+        });
         refresh();
     }
 
@@ -42,25 +49,46 @@ function MissionControl() {
      * Launches all ships that have a mission to space.
      */
     async function launchAll() {
-        await fetch("/ships/launch-all");
+        await fetch("/ships/launch-all", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: "{}",
+        });
         refresh();
     }
 
     /**
      * Sends specified ship to repairs.
-     * @param {*} id ID of the ship that is to be repaired. The ship in question must be damaged.
+     * @param {*} ship Ship that is to be repaired. The ship in question must be damaged.
      */
-    async function repair(id) {
-        await fetch("/ships/" + id + "/repair");
+    async function repair(ship) {
+        await fetch("/ships/repair", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ship),
+        });
         refresh();
     }
 
     /**
      * Decommissions specified ship, making it unusable.
-     * @param {*} id ID of the ship that is to be decommissioned. The ship in question must be available.
+     * @param {*} ship Ship that is to be decommissioned. The ship in question must be available.
      */
-    async function decommission(id) {
-        await fetch("/ships/" + id + "/decommission");
+    async function decommission(ship) {
+        await fetch("/ships/decommission", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ship),
+        });
         refresh();
     }
 
@@ -68,8 +96,15 @@ function MissionControl() {
      * Instructs specified ship to abort its mission and return.
      * @param {*} id ID of the ship that is to abandon its mission. The ship in question must be executing its mission.
      */
-    async function abort(id) {
-        await fetch("/ships/" + id + "/abort");
+    async function abort(ship) {
+        await fetch("/ships/abort", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ship),
+        });
         refresh();
     }
 
@@ -77,7 +112,14 @@ function MissionControl() {
      * Instructs every ship that is executing its mission to abort their activities and return.
      */
     async function abortAll() {
-        await fetch("/ships/abort-all");
+        await fetch("/ships/abort-all", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: "{}",
+        });
         refresh();
     }
 
@@ -183,16 +225,16 @@ function MissionControl() {
                             buttonText="Launch Ship"
                             headerText="Confirm Ship Launch"
                             contents="The ship becomes unavailable for the duration of the mission. Aborting its mission brings it back sooner."
-                            onConfirmation={() => launch(ship.id)}
+                            onConfirmation={() => launch(ship)}
                             options={optsL}/>
-                        <Button size="sm" color="secondary" onClick={() => repair(ship.id)} {...optsR}>Conduct Repairs</Button>
+                        <Button size="sm" color="secondary" onClick={() => repair(ship)} {...optsR}>Conduct Repairs</Button>
                         <ConfirmationBackedButton
                             size="sm"
                             color="warning"
                             buttonText="Abort Mission"
                             headerText="Confirm Mission Aborting"
                             contents="If a mission is aborted, the ship starts its return trip immediately, leaving its mission incomplete."
-                            onConfirmation={() => abort(ship.id)}
+                            onConfirmation={() => abort(ship)}
                             options={optsA}/>
                         <ConfirmationBackedButton
                             size="sm"
@@ -200,7 +242,7 @@ function MissionControl() {
                             buttonText="Decommission Ship"
                             headerText="Confirm Ship Decommissioning"
                             contents="Once a ship is decommissioned, it cannot be used anymore."
-                            onConfirmation={() => decommission(ship.id)}
+                            onConfirmation={() => decommission(ship)}
                             options={optsD}/>
                     </ButtonGroup>
                 </div>
