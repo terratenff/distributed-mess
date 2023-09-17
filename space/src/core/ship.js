@@ -102,7 +102,10 @@ export class Ship {
      * The greater the mission radius, the more destinations are created.
      */
     generateDestinations() {
-        const subdestinationCount = Math.ceil(this.mission.radius / SUBDESTINATION_FACTOR);
+        let subdestinationCount = Math.ceil(this.mission.radius / SUBDESTINATION_FACTOR);
+        if (subdestinationCount === 0) {
+            subdestinationCount = 1;
+        }
         for (var i = 0; i < subdestinationCount; i++) {
             while (true) {
                 const x1 = this.mission.center["x"];
@@ -123,7 +126,7 @@ export class Ship {
                     Math.pow(z2 - z1, 2)
                 );
                 
-                if (d < this.mission.radius) {
+                if (d < this.mission.radius || this.mission.radius < SUBDESTINATION_FACTOR) {
                     this.destinations.push(destination);
                     break;
                 }
@@ -162,9 +165,16 @@ export class Ship {
             Math.pow(z2 - z1, 2)
         );
 
-        this.directionVector["x"] = (x2 - x1) / d;
-        this.directionVector["y"] = (y2 - y1) / d;
-        this.directionVector["z"] = (z2 - z1) / d;
+        if (d < 1) {
+            this.directionVector["x"] = x2 - x1;
+            this.directionVector["y"] = y2 - y1;
+            this.directionVector["z"] = z2 - z1;
+        } else {
+            this.directionVector["x"] = (x2 - x1) / d;
+            this.directionVector["y"] = (y2 - y1) / d;
+            this.directionVector["z"] = (z2 - z1) / d;
+        }
+
     }
 
     /**

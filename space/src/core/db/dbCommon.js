@@ -1,5 +1,6 @@
 import mysql from "mysql2/promise";
 
+import { sleep } from "../../util.js";
 import { Space } from "../space.js";
 import { Ship } from "../ship.js";
 
@@ -13,18 +14,27 @@ const USER = "sample-user";
 const PASSWORD = "sample-password";
 const DATABASE = "sample-db";
 
+const CHECK_CONNECTION_ATTEMPTS = 5;
+const CHECK_CONNECTION_DELAY = 1000;
+
 /**
  * Checks whether it is possible to connect to the database.
  * @returns true, if connection can be made. false otherwise.
  */
 export async function checkConnection() {
-    let con = await establishConnection();
-    if (con !== null) {
-        con.end();
-        return true;
-    } else {
-        return false;
+    for (const i = 0; i < CHECK_CONNECTION_ATTEMPTS; i++) {
+        let con = await establishConnection();
+        if (con !== null) {
+            con.end();
+            return true;
+        }
+
+        if (i !== CHECK_CONNECTION_ATTEMPTS - 1) {
+            sleep(CHECK_CONNECTION_DELAY);
+        }
     }
+
+    return false;
 }
 
 /**
