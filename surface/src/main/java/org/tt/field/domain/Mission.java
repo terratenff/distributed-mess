@@ -49,20 +49,20 @@ public class Mission {
 
     public Mission() {}
 
-    public Mission(String title, String objective, String description, boolean completed, double centerX, double centerY, double centerZ,
-            double radius, Timestamp departureTime, Timestamp arrivalTime, String currentDestination, List<Event> events) {
-        this.title = title;
-        this.objective = objective;
-        this.description = description;
-        this.completed = completed;
-        this.centerX = centerX;
-        this.centerY = centerY;
-        this.centerZ = centerZ;
-        this.radius = radius;
-        this.departureTime = departureTime;
-        this.arrivalTime = arrivalTime;
-        this.currentDestination = currentDestination;
-        this.events = events;
+    public Mission(JSONObject mission) {
+        this.id = mission.getLong("id");
+        this.title = mission.getString("title");
+        this.objective = mission.getString("objective");
+        this.description = mission.getString("description");
+        this.centerX = mission.getJSONObject("center").getDouble("x");
+        this.centerY = mission.getJSONObject("center").getDouble("y");
+        this.centerZ = mission.getJSONObject("center").getDouble("z");
+        this.radius = mission.getDouble("radius");
+
+        JSONArray eventsJson = mission.getJSONArray("events");
+        for (int i = 0; i < eventsJson.length(); i++) {
+            this.events.add(new Event(eventsJson.getJSONObject(i)));
+        }
     }
 
     public String toJson() {

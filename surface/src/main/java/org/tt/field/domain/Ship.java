@@ -16,6 +16,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -52,15 +53,19 @@ public class Ship {
 
     public Ship() {}
 
-    public Ship(Mission mission, List<Mission> pastMissions, List<Log> logs, String name, String status, int condition, int peakCondition, String description) {
-        this.mission = mission;
-        this.pastMissions = pastMissions;
-        this.logs = logs;
-        this.name = name;
-        this.status = status;
-        this.condition = condition;
-        this.peakCondition = peakCondition;
-        this.description = description;
+    public Ship(JSONObject ship) {
+        this.id = ship.getLong("id");
+        this.name = ship.getString("name");
+        this.status = ship.getString("status");
+        this.condition = ship.getInt("condition");
+        this.description = ship.getString("description");
+        this.mission = new Mission(ship.getJSONObject("mission"));
+
+        this.logs = new ArrayList<>();
+        JSONArray logsJson = ship.getJSONArray("logs");
+        for (int i = 0; i < logsJson.length(); i++) {
+            this.logs.add(new Log(logsJson.getJSONObject(i)));
+        }
     }
 
     public String toJson() {
@@ -72,6 +77,12 @@ public class Ship {
         json.put("peakCondition", peakCondition);
         json.put("description", description);
         json.put("mission", new JSONObject(mission.toJson()));
+
+        JSONArray array = new JSONArray();
+        for (Log log : logs) {
+           array.put(new JSONObject(log.toJson()));
+        }
+        json.put("logs", array);
         
         return json.toString();
     }

@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.json.JSONObject;
+import org.tt.field.utils.TimeUtils;
 
 /**
  * Ship log entity.
@@ -35,12 +36,19 @@ public class Log {
         this.description = description;
     }
 
+    public Log(JSONObject log) {
+        this.id = log.getLong("id");
+        this.timestamp = TimeUtils.toTimestamp(log.getString("timestamp"));
+        this.description = log.getString("description");
+    }
+
     public String toJson() {
         return toJsonObject().toString();
     }
 
     public JSONObject toJsonObject() {
         JSONObject json = new JSONObject();
+        json.put("id", id);
         json.put("description", description);
         json.put("timestamp", timestamp.toString());
         return json;

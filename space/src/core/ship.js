@@ -19,6 +19,9 @@ export class Ship {
 
     static useDb = true;
 
+    // Dummy ID values for the surface module, so that data objects have unique IDs.
+    static pseudoLogId = -1;
+
     id = 0;
     name = "Sample Ship";
     description = "Sample Ship Description";
@@ -94,7 +97,8 @@ export class Ship {
      * @param {string} shipLog Log message.
      */
     addShipLog(shipLog) {
-        this.logs.push({"timestamp": currentDate(), "description": shipLog});
+        this.logs.push({"id": Ship.pseudoLogId, "timestamp": currentDate(), "description": shipLog});
+        Ship.pseudoLogId -= 1;
     }
 
     /**

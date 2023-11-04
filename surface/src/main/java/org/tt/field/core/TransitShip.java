@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
+import org.tt.field.utils.HttpUtils;
 
 /**
  * Simulator class for ship entities. Ships are simulated to move around the airspace,
@@ -255,7 +256,7 @@ public class TransitShip extends Thread {
         boolean enteredSpace = false;
         for (int i = 0; i < RETRY_CONNECTION_COUNT; i++) {
             wait(RETRY_TIME);
-            if (ShipHttpUtility.sendShip(ship)) {
+            if (HttpUtils.sendShip(ship)) {
                 enteredSpace = true;
                 break;
             } else if (i != RETRY_CONNECTION_COUNT - 1) {

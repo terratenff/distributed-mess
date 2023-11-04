@@ -26,7 +26,10 @@ function LogPagination({ urlPrefix, limit = 10 }) {
      */
     async function getDataCount() {
         const fetchedData = await (await fetch(urlPrefix)).json();
-        setPageCount(Math.ceil(fetchedData.length / limit));
+        const newPageCount = Math.ceil(fetchedData.length / limit);
+        if (newPageCount !== pageCount) {
+            setPageCount(newPageCount);
+        }
     }
 
     /**
@@ -36,8 +39,9 @@ function LogPagination({ urlPrefix, limit = 10 }) {
     async function movePagination(target) {
         if (target >= 0 && target < pageCount) {
             page.current = target;
-            fetchData();
         }
+        fetchData();
+        getDataCount();
     }
 
     /**

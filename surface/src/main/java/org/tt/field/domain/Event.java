@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.json.JSONObject;
+import org.tt.field.utils.TimeUtils;
 
 /**
  * Mission event entity.
@@ -35,8 +36,15 @@ public class Event {
         this.description = description;
     }
 
+    public Event(JSONObject event) {
+        this.id = event.getLong("id");
+        this.timestamp = TimeUtils.toTimestamp(event.getString("timestamp"));
+        this.description = event.getString("description");
+    }
+
     public String toJson() {
         JSONObject json = new JSONObject();
+        json.put("id", id);
         json.put("description", description);
         json.put("timestamp", timestamp.toString());
         return json.toString();
