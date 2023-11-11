@@ -89,7 +89,7 @@ export class Ship {
      */
     addMissionEvent(eventMsg) {
         this.mission.addEvent(eventMsg);
-        console.log(eventMsg);
+        console.log("ship - " + eventMsg);
     }
 
     /**

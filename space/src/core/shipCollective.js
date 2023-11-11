@@ -1,7 +1,8 @@
+import http from "http";
+
 import { checkConnection } from "./db/dbCommon.js";
+import { initializeSpace } from "./space.js";
 import { setupShips, addShip as addDbShip, removeShip as removeDbShip, updateShips } from "./db/dbShip.js";
-import { Ship } from "./ship.js";
-import { Space } from "./space.js";
 
 /**
  * Convenience function for delaying execution.
@@ -19,7 +20,8 @@ const LOOP_DELAY = 1000;
 export async function initializeShipCollective() {
 
     // Determine whether database features can be used.
-    Space.useDb = await checkConnection();
+    await checkConnection();
+    initializeSpace();
     await delay(100);
 
     await ShipCollective.initialize();
@@ -29,13 +31,17 @@ export async function initializeShipCollective() {
     // Initiate loop where each ship is iterated for movement.
     while (true) {
         await delay(LOOP_DELAY);
+
+        // Check that database connection can still be acquired.
+        await checkConnection();
+
         const ships = ShipCollective.getInstance().getShips();
         for (const shipId in ships) {
             ships[shipId].move();
         }
         ShipCollective.getInstance().removeInboundShips();
 
-        if (i >= SHIP_DATABASE_UPDATE_INTERVAL && Ship.useDb) {
+        if (i >= SHIP_DATABASE_UPDATE_INTERVAL) {
             i = 1;
             updateShips(ShipCollective.getInstance().getShips());
         }
@@ -61,12 +67,9 @@ export class ShipCollective {
             ShipCollective.#collectiveInstance = new ShipCollective();
             ShipCollective.#initializing = false;
             ShipCollective.#initialized = true;
+            ShipCollective.#collectiveInstance.#ships = await setupShips(false);
 
-            if (Ship.useDb) {
-                ShipCollective.#collectiveInstance.#ships = await setupShips(false);
-            }
-
-            console.log("Ship Collective has been initialized.")
+            console.log("shipCollective - Ship Collective has been initialized.")
         }
     }
 
@@ -94,16 +97,13 @@ export class ShipCollective {
      */
     addShip(ship) {
         if (this.#ships[ship.id] !== undefined) {
-            console.log(`ERROR: Ship with id ${ship.id} already exists.`);
+            console.log(`shipCollective - ERROR: Ship with id ${ship.id} already exists.`);
             return;
         }
         this.#ships[ship.id] = ship;
         ship.addShipLog(`${ship.name} has entered space.`);
         ship.addMissionEvent(`${ship.name} has entered space. Its objective is ${ship.mission.objective}.`);
-
-        if (Ship.useDb) {
-            addDbShip(ship);
-        }
+        addDbShip(ship);
     }
 
     /**
@@ -111,10 +111,7 @@ export class ShipCollective {
      * @param {Ship} ship Ship subject to being removed.
      */
     removeShip(ship) {
-        if (Ship.useDb) {
-            removeDbShip(ship);
-        }
-
+        removeDbShip(ship);
         delete this.#ships[ship.id];
     }
 
@@ -140,12 +137,19 @@ export class ShipCollective {
     removeInboundShips() {
         for (let id in this.#ships) {
             if (this.#ships[id].status === "INBOUND") {
-                if (Ship.useDb) {
-                    removeDbShip(this.#ships[id]);
-                }
-
+                removeDbShip(this.#ships[id]);
+                this.sendShipToSurface(this.#ships[id]);
                 delete this.#ships[id];
             }
         }
+    }
+
+    /**
+     * Attempts to connect "surface" module in order to send an inbound ship
+     * back there.
+     * @param {*} ship Inbound ship. 
+     */
+    sendShipToSurface(ship) {
+        // TODO
     }
 }

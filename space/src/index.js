@@ -1,5 +1,4 @@
 import { initializeShipCollective } from "./core/shipCollective.js";
-import { initializeSpace } from "./core/space.js";
 
 import { shipController } from "./controllers/shipController.js";
 import { spaceController } from "./controllers/spaceController.js";
@@ -30,5 +29,5 @@ app.get("/", (request, response) => {
 
 // Initializing ship and space related functions.
 initializeShipCollective();
-initializeSpace();
+
 app.listen(3333);

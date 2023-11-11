@@ -93,7 +93,6 @@ async function createTable() {
 export async function addShip(ship) {
 
     if (!Ship.useDb) {
-        console.log("dbShip - Database is not in use. addShip execution is skipped.")
         return;
     }
 
@@ -143,7 +142,6 @@ export async function addShip(ship) {
 export async function removeShip(ship) {
 
     if (!Ship.useDb) {
-        console.log("dbShip - Database is not in use. removeShip execution is skipped.")
         return;
     }
 

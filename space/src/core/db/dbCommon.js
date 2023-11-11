@@ -19,22 +19,29 @@ const CHECK_CONNECTION_DELAY = 1000;
 
 /**
  * Checks whether it is possible to connect to the database.
- * @returns true, if connection can be made. false otherwise.
+ * If connecting to the database has failed, the application has switched
+ * to offline mode, in which case this function does nothing.
  */
 export async function checkConnection() {
-    for (const i = 0; i < CHECK_CONNECTION_ATTEMPTS; i++) {
+
+    // Check first if the application is in offline mode.
+    if (!Space.useDb || !Ship.useDb) {
+        return;
+    }
+
+    for (let i = 0; i <= CHECK_CONNECTION_ATTEMPTS; i++) {
         let con = await establishConnection();
         if (con !== null) {
             con.end();
-            return true;
+            return;
         }
 
-        if (i !== CHECK_CONNECTION_ATTEMPTS - 1) {
-            sleep(CHECK_CONNECTION_DELAY);
+        if (i !== CHECK_CONNECTION_ATTEMPTS) {
+            console.log(`dbCommon - Could not connect to database. Attempting to reconnect ${CHECK_CONNECTION_ATTEMPTS - i} more times.`);
+            await sleep(CHECK_CONNECTION_DELAY);
         }
     }
-
-    return false;
+    console.log("dbCommon - Attempts to connect to database have failed. Switching to offline mode.");
 }
 
 /**
@@ -43,6 +50,9 @@ export async function checkConnection() {
  * @returns Connection to the database, or null if the connection failed.
  */
 export async function establishConnection() {
+
+    const hideErrorMsg = !Space.useDb || Ship.useDb;
+
     let con = null;
     try {
         con = await mysql.createConnection({
@@ -55,8 +65,10 @@ export async function establishConnection() {
     } catch (err) {
         Space.useDb = false;
         Ship.useDb = false;
-        console.log("ERROR: Could not connect to database (Connection refused). "
-         + "Ships and space points will not be saved for this session.")
+        if (!hideErrorMsg) {
+            console.log("dbCommon - ERROR: Could not connect to database (Connection refused). "
+             + "Ships and space points will not be saved for this session.")
+        }
     }
 
     if (con !== null) {
@@ -64,8 +76,10 @@ export async function establishConnection() {
             if (err) {
                 Space.useDb = false;
                 Ship.useDb = false;
-                console.log("ERROR: Could not connect to database. "
-                + "Ships and space points will not be saved for this session.");
+                if (!hideErrorMsg) {
+                    console.log("dbCommon - ERROR: Could not connect to database. "
+                    + "Ships and space points will not be saved for this session.");
+                }
                 con = null;
             }
         });

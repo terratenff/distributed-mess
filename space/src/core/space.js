@@ -27,9 +27,6 @@ export class Space {
      */
     static async initialize() {
         Space.#initializeSpacePoints();
-
-        // Wait for Space.useDb resolution from shipCollective.
-        await delay(1000);
         if (Space.useDb) {
             Space.spacePoints = await setupSpace(Space.spacePoints, false);
         }
