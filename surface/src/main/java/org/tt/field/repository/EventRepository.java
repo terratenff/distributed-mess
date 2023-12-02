@@ -19,6 +19,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
      * @param offset The first set of mission events are skipped. This determines how many are skipped.
      * @return List of up to <limit> mission events, where first <offset> events are skipped.
      */
-    @Query(value = "SELECT * FROM event LIMIT ?1 OFFSET ?2", nativeQuery = true)
+    @Query(value = "SELECT * FROM event ORDER BY timestamp DESC LIMIT ?1 OFFSET ?2", nativeQuery = true)
     List<Event> findEvents(Integer limit, Integer offset);
 }

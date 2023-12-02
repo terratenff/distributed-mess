@@ -7,7 +7,6 @@ import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,7 +30,7 @@ public class HttpUtils {
      */
     public static boolean sendShip(Ship ship) {
         try {
-            String spaceUrl = getSpaceUrl();
+            String spaceUrl = PropertyUtils.getSpaceUrl();
             URL url = new URL("http://" + spaceUrl + "/ships");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -105,7 +104,7 @@ public class HttpUtils {
      */
     private static JSONObject getObjects(String spaceUrl, String paramsStr) {
         try {
-            String spaceBaseUrl = getSpaceUrl();
+            String spaceBaseUrl = PropertyUtils.getSpaceUrl();
             URL url = new URL("http://" + spaceBaseUrl + spaceUrl + paramsStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -145,7 +144,7 @@ public class HttpUtils {
      */
     private static JSONArray getObjectsArray(String spaceUrl, String paramsStr) {
         try {
-            String spaceBaseUrl = getSpaceUrl();
+            String spaceBaseUrl = PropertyUtils.getSpaceUrl();
             URL url = new URL("http://" + spaceBaseUrl + spaceUrl + paramsStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -173,18 +172,5 @@ public class HttpUtils {
         } catch (IOException e) {
             return null;
         }
-    }
-
-    /**
-     * Creates base URL for the space module from application.properties file.
-     * @return Base URL to space module.
-     * @throws IOException
-     */
-    private static String getSpaceUrl() throws IOException {
-        Properties props = new Properties();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream stream = loader.getResourceAsStream("application.properties");
-        props.load(stream);
-        return props.getProperty("space.url");
     }
 }

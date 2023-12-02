@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.tt.field.domain.Log;
 import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
+import org.tt.field.utils.PropertyUtils;
 
 /**
  * Simulator class that acts as the launch site for ship entities. Only one ship can
@@ -28,12 +29,12 @@ public class LaunchSite {
     /**
      * How long the launch site stands by, waiting for a ship (milliseconds).
      */
-    private static final int IDLE_TIME = 10000;
+    private static final int IDLE_TIME = PropertyUtils.getInteger("org.tt.field.core.LaunchSite.IDLE_TIME", 10000);
 
     /**
      * How long it takes to launch a ship (milliseconds).
      */
-    private static final int LAUNCH_TIME = 15000;
+    private static final int LAUNCH_TIME = PropertyUtils.getInteger("org.tt.field.core.LaunchSite.LAUNCH_TIME", 15000);
 
     /**
      * The probability of a log entry being generated for a ship.
@@ -300,7 +301,9 @@ public class LaunchSite {
 
                 // Creating a transit ship for the target ship.
 
-                (new TransitShip(targetShip, saveShipToRepository, saveMissionToRepository)).start();
+                TransitShip transitShip = new TransitShip(targetShip, saveShipToRepository, saveMissionToRepository);
+                transitShip.toSpace();
+                transitShip.start();
                 logger.info("Ship with ID " + targetShip.getId() + " has finished taking off.");
                 
                 // Target ship is no longer at the launch site.

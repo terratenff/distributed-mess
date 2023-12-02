@@ -26,6 +26,7 @@ import org.tt.field.core.Drydock;
 import org.tt.field.core.EntityValidation;
 import org.tt.field.core.LaunchSite;
 import org.tt.field.core.TransitShip;
+import org.tt.field.domain.Event;
 import org.tt.field.domain.Log;
 import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
@@ -334,6 +335,65 @@ public class ShipController {
                 logger.info("Ship with ID " + ship.getId() + " has been sent to the launch site. Queue number: " + position + ".");
             }
         }
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Receives an inbound ship entity. It is instructed to land.
+     * @param ship Inbound ship. It must exist and be active on surface module.
+     * @return ok (notFound if ship is not found, and badRequest if ship is not active)
+     */
+    @PostMapping("/receive-ship")
+    public ResponseEntity<String> receiveShip(@RequestBody Ship ship) {
+
+        Long id = ship.getId();
+        Ship targetShip = shipRepository.findById(id).orElse(null);
+        if (targetShip == null) {
+            logger.error("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        } else if (!targetShip.getStatus().equals("ACTIVE")) {
+            logger.error("Ship with ID " + id + " is not active: invalid ship received.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        // Transfer changes that occurred to the ship.
+        List<Log> shipLogs = ship.getLogs();
+        List<Event> missionEvents = ship.getMission().getEvents();
+        List<Log> targetShipLogs = targetShip.getLogs();
+        List<Event> targetMissionEvents = targetShip.getMission().getEvents();
+
+        for (Log log : shipLogs) {
+            if (log.getId() <= -1) {
+                Log newLog = new Log();
+                newLog.setTimestamp(log.getTimestamp());
+                newLog.setDescription(log.getDescription());
+                targetShipLogs.add(newLog);
+            }
+        }
+
+        for (Event event : missionEvents) {
+            if (event.getId() <= -1) {
+                Event newEvent = new Event();
+                newEvent.setTimestamp(event.getTimestamp());
+                newEvent.setDescription(event.getDescription());
+                targetMissionEvents.add(newEvent);
+            }
+        }
+
+        Mission updatedMission = targetShip.getMission();
+        updatedMission.setEvents(targetMissionEvents);
+        missionRepository.save(updatedMission);
+
+        targetShip.setLogs(targetShipLogs);
+        targetShip.setCondition(ship.getCondition());
+        targetShip.setStatus("INBOUND");
+        targetShip = shipRepository.save(targetShip);
+
+        logger.info("Ship with ID " + ship.getId() + " has arrived to surface. It is inbound.");
+
+        TransitShip transitShip = new TransitShip(targetShip, saveShipToRepository, saveMissionToRepository);
+        transitShip.toSurface();
+        transitShip.start();
         return ResponseEntity.ok().build();
     }
 

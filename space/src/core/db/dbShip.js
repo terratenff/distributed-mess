@@ -199,7 +199,6 @@ async function getShips() {
 export async function updateShips(ships) {
 
     if (!Ship.useDb) {
-        console.log("dbShip - Database is not in use. updateShips execution is skipped.")
         return;
     }
 

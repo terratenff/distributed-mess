@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.tt.field.domain.Mission;
 import org.tt.field.domain.Ship;
 import org.tt.field.utils.HttpUtils;
+import org.tt.field.utils.PropertyUtils;
 
 /**
  * Simulator class for ship entities. Ships are simulated to move around the airspace,
@@ -26,12 +27,12 @@ public class TransitShip extends Thread {
     /**
      * How long the ships remain in airspace.
      */
-    private static final int TRANSIT_TIME = 60000;
+    private static final int TRANSIT_TIME = PropertyUtils.getInteger("org.tt.field.core.TransitShip.TRANSIT_TIME", 60000);
 
     /**
      * How long the ships wait before trying to connect to space module again.
      */
-    private static final int RETRY_TIME = 10000;
+    private static final int RETRY_TIME = PropertyUtils.getInteger("org.tt.field.core.TransitShip.RETRY_DELAY", 10000);
 
     /**
      * How many times the ships attempt to connect to space before giving up and returning to surface.
@@ -72,7 +73,7 @@ public class TransitShip extends Thread {
             }
         }
 
-        if (targetShip != null) {
+        if (targetShip != null && !targetShip.direction) {
             targetShip.abortMission = true;
             return true;
         } else {
@@ -129,6 +130,11 @@ public class TransitShip extends Thread {
     private boolean missionCompleted = true;
 
     /**
+     * Ship direction. true: to space. false: to surface.
+     */
+    private boolean direction = true;
+
+    /**
      * Transit ship constructor.
      * @param ship Ship entity that is to be represented.
      * @param saveShipToRepository Function that must save ship entity to its repository.
@@ -142,7 +148,29 @@ public class TransitShip extends Thread {
         shipsOnTransit.add(this);
     }
 
+    /**
+     * Set ship direction to space.
+     */
+    public void toSpace() {
+        direction = true;
+    }
+
+    /**
+     * Set ship direction to surface.
+     */
+    public void toSurface() {
+        direction = false;
+    }
+
     public void run() {
+        if (direction) {
+            moveToSpace();
+        } else {
+            moveToSurface();
+        }
+    }
+
+    private void moveToSpace() {
         try {
             while (true) {
                 wait(TRANSIT_TIME);
@@ -231,6 +259,60 @@ public class TransitShip extends Thread {
                     ship.setMission(null);
                     ship = saveShipToRepository.apply(ship);
 
+                    // Transit ship is no longer needed.
+
+                    concluded = true;
+                    
+                    return;
+                }
+            }
+            
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void moveToSurface() {
+        try {
+            while (true) {
+                wait(TRANSIT_TIME);
+
+                if (ship.getStatus().equals("INBOUND")) {
+
+                    // Transit ship is approaching land.
+
+                    wait(TRANSIT_TIME);
+                    logger.info("Ship with ID " + ship.getId() + " is attempting to land.");
+                    ship.setStatus("LANDING");
+                    ship = saveShipToRepository.apply(ship);
+
+                    // Transit ship is landing.
+
+                    wait(TRANSIT_TIME);
+                    String shipStatus;
+                    if (ship.getCondition() == 0) {
+                        logger.info("Ship with ID " + ship.getId() + " has crashed.");
+                        shipStatus = "CRASHED";
+                    } else if (ship.getCondition() < (ship.getPeakCondition() / 10)) {
+                        logger.info("Ship with ID " + ship.getId() + " has landed in a broken state.");
+                        shipStatus = "BROKEN";
+                    } else {
+                        logger.info("Ship with ID " + ship.getId() + " has landed.");
+                        shipStatus = "READY";
+                    }
+
+                    // Transit ship has landed. Ship entity's mission marked as
+                    // completed.
+
+                    Mission mission = ship.getMission();
+                    mission.setCompleted(missionCompleted);
+                    mission.setArrivalTime(Timestamp.from(Instant.now()));
+                    saveMissionToRepository.apply(mission);
+                    
+                    ship.getPastMissions().add(mission);
+                    ship.setStatus(shipStatus);
+                    ship.setMission(null);
+                    ship = saveShipToRepository.apply(ship);
 
                     // Transit ship is no longer needed.
 
@@ -243,7 +325,6 @@ public class TransitShip extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
     }
 
     /**

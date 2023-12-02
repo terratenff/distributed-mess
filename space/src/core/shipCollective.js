@@ -150,6 +150,13 @@ export class ShipCollective {
      * @param {*} ship Inbound ship. 
      */
     sendShipToSurface(ship) {
-        // TODO
+        console.log(JSON.stringify(ship));
+        fetch("http://localhost:8080/ships/receive-ship", {
+            method: "POST",
+            body: JSON.stringify(ship),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
     }
 }
