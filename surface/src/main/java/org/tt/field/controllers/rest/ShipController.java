@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.tt.field.core.Drydock;
 import org.tt.field.core.EntityValidation;
@@ -87,6 +88,36 @@ public class ShipController {
     @GetMapping
     public List<Ship> getShips() {
         return shipRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+    }
+
+    /**
+     * @return Number of ship entities in the database.
+     */
+    @GetMapping("/count")
+    public Long getShipCount() {
+        return shipRepository.count();
+    }
+
+    /**
+     * Get most recently added ships by name.
+     * @param limitStr How many ships are returned at most.
+     * @param query What must ship name contain in order to be fetched.
+     * @return Up to <limit> ships that contain <query> in their names.
+     */
+    @GetMapping("/recent")
+    public List<Ship> getRecentShips(
+        @RequestParam(name = "limit", defaultValue = "25") String limitStr,
+        @RequestParam(name = "query", defaultValue = "") String query) {
+            try {
+                final int limit = Integer.parseInt(limitStr);
+                if (query.isEmpty()) {
+                    return new ArrayList<Ship>(shipRepository.findRecentShips(limit));
+                } else {
+                    return new ArrayList<Ship>(shipRepository.findRecentShipsByName(limit, query));
+                }
+            } catch (NumberFormatException e) {
+                return List.of();
+            }
     }
 
     /**

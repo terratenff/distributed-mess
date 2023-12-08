@@ -19,4 +19,20 @@ public interface ShipRepository extends JpaRepository<Ship, Long> {
      */
     @Query("SELECT s FROM Ship s WHERE s.mission != null")
     Collection<Ship> findAllAssignedShips();
+
+    /**
+     * Queries specified number of ships.
+     * @param limit At most this many ships are returned.
+     * @return List of up to <limit> ships.
+     */
+    @Query(value = "SELECT * FROM ship ORDER BY id DESC LIMIT ?1", nativeQuery = true)
+    Collection<Ship> findRecentShips(Integer limit);
+
+    /**
+     * Queries ships by name.
+     * @param name What the name of the ships should contain.
+     * @return List of ships that contain specified string in their names.
+     */
+    @Query(value = "SELECT * FROM ship WHERE name LIKE %?2% ORDER BY id DESC LIMIT ?1", nativeQuery = true)
+    Collection<Ship> findRecentShipsByName(Integer limit, String name);
 }

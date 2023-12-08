@@ -84,7 +84,7 @@ function AssignMission() {
             body: JSON.stringify(assignedShip),
         });
 
-        navigate("/mission-control?open-ship=" + assignedShip.id);
+        navigate("/mission-control");
     }
 
     /**
@@ -191,7 +191,7 @@ function AssignMission() {
                     </FormGroup>
                     <FormGroup>
                         <Button color="primary" type="submit">Save</Button>{' '}
-                        <Button color="secondary" tag={Link} to={"/mission-control?open-ship=" + ship.id}>Cancel</Button>
+                        <Button color="secondary" tag={Link} to="/mission-control">Cancel</Button>
                     </FormGroup>
                 </Form>
             </Container>

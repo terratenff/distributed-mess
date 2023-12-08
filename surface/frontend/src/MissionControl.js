@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, AccordionHeader, AccordionItem, UncontrolledCollapse, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import { Link, useLocation } from 'react-router-dom';
+import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, AccordionHeader, AccordionItem, UncontrolledCollapse, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label } from 'reactstrap';
+import { Link } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
 import AppFooter from "./AppFooter";
@@ -15,18 +15,31 @@ function MissionControl() {
      * Updates the component with ship entities that are fetched from the application.
      */
     async function refresh() {
-        fetch('/ships')
-            .then(response => {
-                if (!response.ok) {
-                    return Promise.reject(response);
-                }
-                setNoConnection(false);
-                return response.json();
-            })
-            .then(data => setShips(data))
-            .catch(error => {
-                setNoConnection(true);
-            });
+        const shipCount = await (await fetch(`/ships/count`)).json();
+        dynamicFilter.current = shipCount <= shipLoadLimit.current;
+        let url = `/ships/recent?limit=${shipLoadLimit.current}`;
+        if (dynamicFilter.current) {
+            previousConfirmedQuery.current = filterValue;
+            if (filterValue.length !== 0) {
+                url = url + `&query=${filterValue}`;
+            }
+        } else {
+            if (previousConfirmedQuery.current.length !== 0) {
+                url = url + `&query=${previousConfirmedQuery.current}`;
+            }
+        }
+        await fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                return Promise.reject(response);
+            }
+            setNoConnection(false);
+            return response.json();
+        })
+        .then(data => setShips(data))
+        .catch(error => {
+            setNoConnection(true);
+        });
     }
 
     /**
@@ -123,17 +136,37 @@ function MissionControl() {
         refresh();
     }
 
-    const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
-
-    // Open a specific ship's menu if such a parameter is provided.
-    const searchUrl = useLocation().search;
-    let openShipId = new URLSearchParams(searchUrl).get("open-ship");
-    if (openShipId === null) {
-        openShipId = "0";
+    async function changeShipLoadLimit(newShipLoadLimit) {
+        shipLoadLimit.current = newShipLoadLimit;
+        refresh();
     }
 
+    async function handleFilterChange(event) {
+        setFilterValue(event.target.value);
+    }
+
+    async function handleKeyDown(event) {
+        if (event.code === "Enter" && previousConfirmedQuery.current !== filterValue) {
+            previousConfirmedQuery.current = filterValue;
+            refresh();
+        }
+    }
+
+    async function handleBlur(event) {
+        if (previousConfirmedQuery.current !== filterValue) {
+            previousConfirmedQuery.current = filterValue;
+            refresh();
+        }
+    }
+
+    const NO_CONNECTION_JSX = (<Alert color="danger">Error: no connection to server.</Alert>);
+
     const [ships, setShips] = useState([]);
-    const [accordionOpen, setAccordionOpen] = useState(openShipId);
+    const [accordionOpen, setAccordionOpen] = useState("0");
+    const shipLoadLimit = useRef(25);
+    const dynamicFilter = useRef(true);
+    const previousConfirmedQuery = useRef("");
+    const [filterValue, setFilterValue] = useState("");
     const [noConnection, setNoConnection] = useState(true);
     const initialized = useRef(false);
 
@@ -162,8 +195,33 @@ function MissionControl() {
         return () => clearInterval(timer);
     });
 
+    let filterField = (
+        <div style={{display: "flex"}}>
+            <Label
+                for="filter"
+                style={{width: "100px", display: "flex", alignSelf: "center", margin: "0px"}}
+            >
+                Filter Ships
+            </Label>
+            <Input
+                type="text"
+                name="filter"
+                id="filter"
+                style={{width: "100%", display: "flex", margin: "10px"}}
+                value={filterValue}
+                onChange={handleFilterChange}
+                onKeyDown={handleKeyDown}
+                onBlur={handleBlur}
+            />
+        </div>
+    );
+
     // Building the accordion component.
-    const shipList = ships.map(ship => {
+    let filteredShips = ships;
+    if (dynamicFilter.current) {
+        filteredShips = filteredShips.filter(ship => ship.name.includes(filterValue));
+    }
+    const shipList = filteredShips.map(ship => {
         const optsM = {"disabled": (ship.status === "READY" ? false : true)};
         const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
         const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition ? false : true)};
@@ -257,7 +315,10 @@ function MissionControl() {
             <Container fluid className="page-fill">
                 {noConnection ? NO_CONNECTION_JSX : ""}
                 <h3>Mission Control</h3>
-                <div>
+                <div style={{display: "inline-block", padding: "8px"}}>
+                    <span>General Controls</span>
+                </div>
+                <ButtonGroup>
                     <ConfirmationBackedButton
                             size="lg"
                             color="primary"
@@ -274,7 +335,61 @@ function MissionControl() {
                             contents="Every ship that is executing its mission is commanded to come back, leaving their missions incomplete."
                             onConfirmation={() => abortAll()}
                             options={{}}/>
-                </div>
+                    </ButtonGroup>
+                    <div style={{display: "inline-block", padding: "8px"}}>
+                        <span>Ship Load Quantity</span>
+                    </div>
+                    <ButtonGroup>
+                    <Button
+                        color={shipLoadLimit.current === 25 ? "primary" : "secondary"}
+                        disabled={shipLoadLimit.current === 25}
+                        onClick={() => changeShipLoadLimit(25)}
+                        size="lg"
+                    >
+                        25
+                    </Button>
+                    <Button
+                        color={shipLoadLimit.current === 100 ? "primary" : "secondary"}
+                        disabled={shipLoadLimit.current === 100}
+                        onClick={() => changeShipLoadLimit(100)}
+                        size="lg"
+                    >
+                        100
+                    </Button>
+                    <Button
+                        color={shipLoadLimit.current === 250 ? "primary" : "secondary"}
+                        disabled={shipLoadLimit.current === 250}
+                        onClick={() => changeShipLoadLimit(250)}
+                        size="lg"
+                    >
+                        250
+                    </Button>
+                    <Button
+                        color={shipLoadLimit.current === 500 ? "primary" : "secondary"}
+                        disabled={shipLoadLimit.current === 500}
+                        onClick={() => changeShipLoadLimit(500)}
+                        size="lg"
+                    >
+                        500
+                    </Button>
+                    <Button
+                        color={shipLoadLimit.current === 1000 ? "primary" : "secondary"}
+                        disabled={shipLoadLimit.current === 1000}
+                        onClick={() => changeShipLoadLimit(1000)}
+                        size="lg"
+                    >
+                        1000
+                    </Button>
+                    <Button
+                        color={shipLoadLimit.current === 999999999 ? "primary" : "secondary"}
+                        disabled={shipLoadLimit.current === 999999999}
+                        onClick={() => changeShipLoadLimit(999999999)}
+                        size="lg"
+                    >
+                        All
+                    </Button>
+                </ButtonGroup>
+                {filterField}
                 <Accordion flush open={accordionOpen} toggle={(id) => operateAccordion(id)}>
                     {shipList}
                 </Accordion>
