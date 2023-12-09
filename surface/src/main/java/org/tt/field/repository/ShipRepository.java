@@ -33,6 +33,6 @@ public interface ShipRepository extends JpaRepository<Ship, Long> {
      * @param name What the name of the ships should contain.
      * @return List of ships that contain specified string in their names.
      */
-    @Query(value = "SELECT * FROM ship WHERE name LIKE %?2% ORDER BY id DESC LIMIT ?1", nativeQuery = true)
+    @Query(value = "SELECT * FROM ship WHERE name ILIKE %?2% ORDER BY id DESC LIMIT ?1", nativeQuery = true)
     Collection<Ship> findRecentShipsByName(Integer limit, String name);
 }

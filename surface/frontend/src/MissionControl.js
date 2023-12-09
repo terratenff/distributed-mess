@@ -1,5 +1,23 @@
 import { useState, useEffect, useRef } from "react";
-import { Button, ButtonGroup, Container, Alert, Accordion, AccordionBody, AccordionHeader, AccordionItem, UncontrolledCollapse, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label } from 'reactstrap';
+import {
+    Button,
+    ButtonGroup,
+    Container,
+    Alert,
+    Accordion,
+    AccordionBody,
+    AccordionHeader,
+    AccordionItem,
+    UncontrolledCollapse,
+    Modal,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Input,
+    Label,
+    InputGroup,
+    InputGroupText
+} from 'reactstrap';
 import { Link } from 'react-router-dom';
 import AppNavbar from "./AppNavbar";
 import spaceship from './images/spaceship.png';
@@ -195,31 +213,35 @@ function MissionControl() {
         return () => clearInterval(timer);
     });
 
+    let filterFieldAlert = (
+        <Alert color="warning" style={{margin: "0px"}}>
+            {shipLoadLimit.current}+ ship entities found. Only the first {shipLoadLimit.current} ships are shown.
+            Use ship filtering below to find relevant ships. Hit enter to start filter query.
+        </Alert>
+    );
+
     let filterField = (
-        <div style={{display: "flex"}}>
-            <Label
-                for="filter"
-                style={{width: "100px", display: "flex", alignSelf: "center", margin: "0px"}}
-            >
-                Filter Ships
-            </Label>
+        <InputGroup>
+            <InputGroupText style={{width: "200px"}} color="primary">
+                <Label for="filter" style={{margin: "0px"}}>Filter ships</Label>
+            </InputGroupText>
             <Input
                 type="text"
                 name="filter"
                 id="filter"
-                style={{width: "100%", display: "flex", margin: "10px"}}
+                placeholder="(Search by ship name)"
                 value={filterValue}
                 onChange={handleFilterChange}
                 onKeyDown={handleKeyDown}
                 onBlur={handleBlur}
             />
-        </div>
+        </InputGroup>
     );
 
     // Building the accordion component.
     let filteredShips = ships;
     if (dynamicFilter.current) {
-        filteredShips = filteredShips.filter(ship => ship.name.includes(filterValue));
+        filteredShips = filteredShips.filter(ship => ship.name.toLocaleLowerCase().includes(filterValue.toLocaleLowerCase()));
     }
     const shipList = filteredShips.map(ship => {
         const optsM = {"disabled": (ship.status === "READY" ? false : true)};
@@ -315,80 +337,97 @@ function MissionControl() {
             <Container fluid className="page-fill">
                 {noConnection ? NO_CONNECTION_JSX : ""}
                 <h3>Mission Control</h3>
-                <div style={{display: "inline-block", padding: "8px"}}>
-                    <span>General Controls</span>
-                </div>
-                <ButtonGroup>
-                    <ConfirmationBackedButton
-                            size="lg"
-                            color="primary"
-                            buttonText="Launch Assigned Ships"
-                            headerText="Confirm Ship Launches"
-                            contents="Every assigned ship will be sent. Unassigned ships will remain."
-                            onConfirmation={() => launchAll()}
-                            options={{}}/>
-                    <ConfirmationBackedButton
-                            size="lg"
-                            color="danger"
-                            buttonText="Abort All Missions"
-                            headerText="Confirm Mission Terminations"
-                            contents="Every ship that is executing its mission is commanded to come back, leaving their missions incomplete."
-                            onConfirmation={() => abortAll()}
-                            options={{}}/>
-                    </ButtonGroup>
-                    <div style={{display: "inline-block", padding: "8px"}}>
-                        <span>Ship Load Quantity</span>
-                    </div>
+                <InputGroup>
                     <ButtonGroup>
-                    <Button
-                        color={shipLoadLimit.current === 25 ? "primary" : "secondary"}
-                        disabled={shipLoadLimit.current === 25}
-                        onClick={() => changeShipLoadLimit(25)}
-                        size="lg"
-                    >
-                        25
-                    </Button>
-                    <Button
-                        color={shipLoadLimit.current === 100 ? "primary" : "secondary"}
-                        disabled={shipLoadLimit.current === 100}
-                        onClick={() => changeShipLoadLimit(100)}
-                        size="lg"
-                    >
-                        100
-                    </Button>
-                    <Button
-                        color={shipLoadLimit.current === 250 ? "primary" : "secondary"}
-                        disabled={shipLoadLimit.current === 250}
-                        onClick={() => changeShipLoadLimit(250)}
-                        size="lg"
-                    >
-                        250
-                    </Button>
-                    <Button
-                        color={shipLoadLimit.current === 500 ? "primary" : "secondary"}
-                        disabled={shipLoadLimit.current === 500}
-                        onClick={() => changeShipLoadLimit(500)}
-                        size="lg"
-                    >
-                        500
-                    </Button>
-                    <Button
-                        color={shipLoadLimit.current === 1000 ? "primary" : "secondary"}
-                        disabled={shipLoadLimit.current === 1000}
-                        onClick={() => changeShipLoadLimit(1000)}
-                        size="lg"
-                    >
-                        1000
-                    </Button>
-                    <Button
-                        color={shipLoadLimit.current === 999999999 ? "primary" : "secondary"}
-                        disabled={shipLoadLimit.current === 999999999}
-                        onClick={() => changeShipLoadLimit(999999999)}
-                        size="lg"
-                    >
-                        All
-                    </Button>
-                </ButtonGroup>
+                        <InputGroupText style={{width: "200px"}}>General controls</InputGroupText>
+                        <ConfirmationBackedButton
+                                size="lg"
+                                color="primary"
+                                buttonText="Launch Assigned Ships"
+                                headerText="Confirm Ship Launches"
+                                contents="Every assigned ship will be sent. Unassigned ships will remain."
+                                onConfirmation={() => launchAll()}
+                                options={{}}/>
+                        <ConfirmationBackedButton
+                                size="lg"
+                                color="secondary"
+                                buttonText="Send Unassigned Ships to Repairs"
+                                headerText="Confirm Mission Terminations"
+                                contents="Every unassigned ship will be sent for repairs."
+                                onConfirmation={() => console.log("TODO")}
+                                options={{}}/>
+                        <ConfirmationBackedButton
+                                size="lg"
+                                color="warning"
+                                buttonText="Unassign Assigned Ships"
+                                headerText="Confirm Mission Terminations"
+                                contents="Every assigned ship will be unassigned, resulting in loss of mission data."
+                                onConfirmation={() => console.log("TODO")}
+                                options={{}}/>
+                        <ConfirmationBackedButton
+                                size="lg"
+                                color="danger"
+                                buttonText="Abort All Missions"
+                                headerText="Confirm Mission Terminations"
+                                contents="Every ship that is executing its mission is commanded to come back, leaving their missions incomplete."
+                                onConfirmation={() => abortAll()}
+                                options={{}}/>
+                    </ButtonGroup>
+                </InputGroup>
+                <InputGroup>
+                    <ButtonGroup>
+                        <InputGroupText style={{width: "200px"}}>Ship load quantity</InputGroupText>
+                        <Button
+                            color={shipLoadLimit.current === 25 ? "primary" : "secondary"}
+                            disabled={shipLoadLimit.current === 25}
+                            onClick={() => changeShipLoadLimit(25)}
+                            size="lg"
+                        >
+                            25
+                        </Button>
+                        <Button
+                            color={shipLoadLimit.current === 100 ? "primary" : "secondary"}
+                            disabled={shipLoadLimit.current === 100}
+                            onClick={() => changeShipLoadLimit(100)}
+                            size="lg"
+                        >
+                            100
+                        </Button>
+                        <Button
+                            color={shipLoadLimit.current === 250 ? "primary" : "secondary"}
+                            disabled={shipLoadLimit.current === 250}
+                            onClick={() => changeShipLoadLimit(250)}
+                            size="lg"
+                        >
+                            250
+                        </Button>
+                        <Button
+                            color={shipLoadLimit.current === 500 ? "primary" : "secondary"}
+                            disabled={shipLoadLimit.current === 500}
+                            onClick={() => changeShipLoadLimit(500)}
+                            size="lg"
+                        >
+                            500
+                        </Button>
+                        <Button
+                            color={shipLoadLimit.current === 1000 ? "primary" : "secondary"}
+                            disabled={shipLoadLimit.current === 1000}
+                            onClick={() => changeShipLoadLimit(1000)}
+                            size="lg"
+                        >
+                            1000
+                        </Button>
+                        <Button
+                            color={shipLoadLimit.current === 999999999 ? "primary" : "secondary"}
+                            disabled={shipLoadLimit.current === 999999999}
+                            onClick={() => changeShipLoadLimit(999999999)}
+                            size="lg"
+                        >
+                            All
+                        </Button>
+                    </ButtonGroup>
+                </InputGroup>
+                {dynamicFilter.current ? "" : filterFieldAlert}
                 {filterField}
                 <Accordion flush open={accordionOpen} toggle={(id) => operateAccordion(id)}>
                     {shipList}
