@@ -8,7 +8,6 @@ import {
     AccordionBody,
     AccordionHeader,
     AccordionItem,
-    UncontrolledCollapse,
     Modal,
     ModalHeader,
     ModalBody,
@@ -38,9 +37,6 @@ function MissionControl() {
         let url = `/ships/recent?limit=${shipLoadLimit.current}`;
         if (dynamicFilter.current) {
             previousConfirmedQuery.current = filterValue;
-            if (filterValue.length !== 0) {
-                url = url + `&query=${filterValue}`;
-            }
         } else {
             if (previousConfirmedQuery.current.length !== 0) {
                 url = url + `&query=${previousConfirmedQuery.current}`;
@@ -92,11 +88,83 @@ function MissionControl() {
     }
 
     /**
+     * Removes currently assigned mission from selected ship.
+     * @param {*} ship Ship that is to be unassigned. The ship in question must be assigned to a mission.
+     */
+    async function unassign(ship) {
+        const assignedShip = structuredClone(ship);
+        assignedShip.mission = null;
+        await fetch('/ships/' + assignedShip.id, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(assignedShip),
+        });
+        refresh();
+    }
+
+    /**
+     * Removes currently assigned mission from every ship that is in ready state.
+     */
+    async function unassignAll() {
+        const targetShips = ships.filter((s) => s.status === "READY");
+        for (const ship of targetShips) {
+            const assignedShip = structuredClone(ship);
+            assignedShip.mission = null;
+            await fetch('/ships/' + assignedShip.id, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(assignedShip),
+            });
+        }
+        refresh();
+    }
+
+    /**
      * Sends specified ship to repairs.
      * @param {*} ship Ship that is to be repaired. The ship in question must be damaged.
      */
     async function repair(ship) {
         await fetch("/ships/repair", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ship),
+        });
+        refresh();
+    }
+
+    /**
+     * Sends every ship that is in ready/broken state to repairs.
+     */
+    async function repairAll() {
+        const targetShips = ships.filter((s) => (s.status === "READY" && s.condition < s.peakCondition) || s.status === "BROKEN");
+        for (const ship of targetShips) {
+            await fetch("/ships/repair", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(ship),
+            });
+        }
+        refresh();
+    }
+
+    /**
+     * Aborts repair procedure for specified ship. Only works for ships that are awaiting repairs.
+     * @param {*} ship Ship that is waiting for repairs.
+     */
+    async function abortRepair(ship) {
+        await fetch("/ships/abort-repair", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -244,36 +312,41 @@ function MissionControl() {
         filteredShips = filteredShips.filter(ship => ship.name.toLocaleLowerCase().includes(filterValue.toLocaleLowerCase()));
     }
     const shipList = filteredShips.map(ship => {
+        const awaitingRepairs = ship.status.startsWith("AWAITING_REPAIRS");
+        const repairButtonText = awaitingRepairs ? "Abort Repairs" : "Conduct Repairs";
+        const repairButtonFunction = awaitingRepairs ? abortRepair : repair;
+
         const optsM = {"disabled": (ship.status === "READY" ? false : true)};
         const optsL = {"disabled": (ship.status === "READY" && ship.mission !== null ? false : true)};
-        const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition ? false : true)};
+        const optsR = {"disabled": ((ship.status === "READY" || ship.status === "BROKEN") && ship.condition < ship.peakCondition || awaitingRepairs ? false : true)};
         const optsA = {"disabled": (ship.status.startsWith("AWAITING_TAKEOFF") || ship.status === "OUTBOUND" || ship.status === "TAKING_OFF" ? false : true)};
         const optsD = {"disabled": (ship.status === "READY" || ship.status === "BROKEN" ? false : true)};
+
+
         const indicatorFactor = 10.4;
         const conditionIndicatorWidth = ship.condition / indicatorFactor;
         const peakConditionIndicatorWidth = (ship.peakCondition - ship.condition) / indicatorFactor;
 
-        let missionDetailsIndicator;
         let missionDetails;
         if (ship.mission !== null) {
-            // Ship has a mission, so create a button that shows mission details.
-            missionDetailsIndicator = (
-                <Button id={"collapse" + ship.id} style={{float: "left"}}>Mission Details</Button>
-            );
             missionDetails = (
-                <UncontrolledCollapse toggler={"#collapse" + ship.id} style={{float: "left", paddingLeft: 100 + "px"}}>
+                <div>
                     <p style={{marginBottom: 0, textAlign: "left"}}>Mission Title: {ship.mission.title}</p>
                     <p style={{marginBottom: 0, textAlign: "left"}}>Mission Objective: {ship.mission.objective}</p>
                     <p style={{marginBottom: 0, textAlign: "left"}}>Mission Coordinates (X / Y / Z): {ship.mission.centerX} / {ship.mission.centerY} / {ship.mission.centerZ}</p>
                     <p style={{marginBottom: 0, textAlign: "left"}}>Mission Area Radius: {ship.mission.radius}</p>
-                    <p style={{marginBottom: 0, textAlign: "left"}}>Mission Description:</p>
-                    <br/>
-                    <p style={{marginBottom: 0, textAlign: "left"}}>{ship.mission.description}</p>
-                </UncontrolledCollapse>
+                    {ship.mission.description.length > 0 ? (
+                        <>
+                            <p style={{marginBottom: 0, textAlign: "left"}}>Mission Description:</p>
+                            <br/>
+                            <p style={{marginBottom: 0, textAlign: "left"}}>{ship.mission.description}</p>
+                        </>
+                    ) : (<></>)}
+                    
+                </div>
             );
         } else {
-            missionDetailsIndicator = (<p style={{float: "left"}} className="text-muted">Unassigned</p>);
-            missionDetails = (<></>);
+            missionDetails = (<p style={{textAlign: "left", margin: "0px"}} className="text-muted">Unassigned</p>);
         }
 
         return <AccordionItem key={ship.id}>
@@ -285,48 +358,56 @@ function MissionControl() {
                 <div style={{margin: 0, width: peakConditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "red"}}></div>
             </AccordionHeader>
             <AccordionBody accordionId={ship.id.toString()}>
-                <div style={{height: "160px"}}>
-                    <div style={{display: "inline-flex", float: "left", width: 85 + "%"}}>
-                        <img src={spaceship} alt="spaceship.png" style={{maxHeight: 100 + "px"}}></img>
-                        <div style={{width: 35 + "%"}}>
-                            <p style={{margin: 0, textAlign: "left"}}>{ship.name}</p>
-                            <p style={{margin: 0, textAlign: "left"}}>ID: {ship.id}</p>
-                            <p style={{margin: 0, textAlign: "left"}}>Current Status: {ship.status}</p>
-                            <p style={{margin: 0, textAlign: "left"}}>Current Condition: {ship.condition} / {ship.peakCondition}</p>
-                            {missionDetailsIndicator}
+                <div style={{overflowX: "auto"}}>
+                    <div style={{height: "200px"}}>
+                        <div style={{display: "inline-flex", float: "left", width: "100%"}}>
+                            <img src={spaceship} alt="spaceship.png" style={{maxHeight: "100px"}}></img>
+                            <div style={{minWidth: "275px"}}>
+                                <p style={{margin: 0, textAlign: "left"}}>{ship.name}</p>
+                                <p style={{margin: 0, textAlign: "left"}}>ID: {ship.id}</p>
+                                <p style={{margin: 0, textAlign: "left"}}>Current Status: {ship.status}</p>
+                                <p style={{margin: 0, textAlign: "left"}}>Current Condition: {ship.condition} / {ship.peakCondition}</p>
+                            </div>
+                            <p style={{margin: 0, width: "100%", minWidth: "200px", textAlign: "left"}}>{ship.description}</p>
+                            <ButtonGroup vertical style={{minWidth: "150px"}}>
+                                <Button size="sm" color="primary" tag={Link} to={"/mission-control/" + ship.id} {...optsM}>Assign Mission</Button>
+                                {ship.mission !== null ? (
+                                    <>
+                                        <Button size="sm" color="warning" onClick={() => unassign(ship)} {...optsM}>Unassign Mission</Button>
+                                    </>
+                                ) : (<></>)}
+                                <ConfirmationBackedButton
+                                    size="sm"
+                                    color="success"
+                                    buttonText="Launch Ship"
+                                    headerText="Confirm Ship Launch"
+                                    contents="The ship becomes unavailable for the duration of the mission. Aborting its mission brings it back sooner."
+                                    onConfirmation={() => launch(ship)}
+                                    options={optsL}/>
+                                <Button size="sm" color="secondary" onClick={() => repairButtonFunction(ship)} {...optsR}>{repairButtonText}</Button>
+                                <ConfirmationBackedButton
+                                    size="sm"
+                                    color="warning"
+                                    buttonText="Abort Mission"
+                                    headerText="Confirm Mission Aborting"
+                                    contents="If a mission is aborted, the ship starts its return trip immediately, leaving its mission incomplete."
+                                    onConfirmation={() => abort(ship)}
+                                    options={optsA}/>
+                                <ConfirmationBackedButton
+                                    size="sm"
+                                    color="danger"
+                                    buttonText="Decommission Ship"
+                                    headerText="Confirm Ship Decommissioning"
+                                    contents="Once a ship is decommissioned, it cannot be used anymore."
+                                    onConfirmation={() => decommission(ship)}
+                                    options={optsD}/>
+                            </ButtonGroup>
                         </div>
-                        <p style={{margin: 0, width: 100 + "%", textAlign: "left"}}>{ship.description}</p>
                     </div>
-                    <ButtonGroup vertical style={{float: "right"}}>
-                        <Button size="sm" color="primary" tag={Link} to={"/mission-control/" + ship.id} {...optsM}>Assign Mission</Button>
-                        <ConfirmationBackedButton
-                            size="sm"
-                            color="success"
-                            buttonText="Launch Ship"
-                            headerText="Confirm Ship Launch"
-                            contents="The ship becomes unavailable for the duration of the mission. Aborting its mission brings it back sooner."
-                            onConfirmation={() => launch(ship)}
-                            options={optsL}/>
-                        <Button size="sm" color="secondary" onClick={() => repair(ship)} {...optsR}>Conduct Repairs</Button>
-                        <ConfirmationBackedButton
-                            size="sm"
-                            color="warning"
-                            buttonText="Abort Mission"
-                            headerText="Confirm Mission Aborting"
-                            contents="If a mission is aborted, the ship starts its return trip immediately, leaving its mission incomplete."
-                            onConfirmation={() => abort(ship)}
-                            options={optsA}/>
-                        <ConfirmationBackedButton
-                            size="sm"
-                            color="danger"
-                            buttonText="Decommission Ship"
-                            headerText="Confirm Ship Decommissioning"
-                            contents="Once a ship is decommissioned, it cannot be used anymore."
-                            onConfirmation={() => decommission(ship)}
-                            options={optsD}/>
-                    </ButtonGroup>
+                    <div>
+                        {missionDetails}
+                    </div>
                 </div>
-                {missionDetails}
             </AccordionBody>
         </AccordionItem>
     });
@@ -338,31 +419,31 @@ function MissionControl() {
                 {noConnection ? NO_CONNECTION_JSX : ""}
                 <h3>Mission Control</h3>
                 <InputGroup>
-                    <ButtonGroup>
+                    <ButtonGroup style={{width: "100%"}}>
                         <InputGroupText style={{width: "200px"}}>General controls</InputGroupText>
                         <ConfirmationBackedButton
                                 size="lg"
                                 color="primary"
                                 buttonText="Launch Assigned Ships"
                                 headerText="Confirm Ship Launches"
-                                contents="Every assigned ship will be sent. Unassigned ships will remain."
+                                contents="Every assigned ship will be sent to carry out their missions. Unassigned ships will remain."
                                 onConfirmation={() => launchAll()}
                                 options={{}}/>
                         <ConfirmationBackedButton
                                 size="lg"
                                 color="secondary"
                                 buttonText="Send Unassigned Ships to Repairs"
-                                headerText="Confirm Mission Terminations"
-                                contents="Every unassigned ship will be sent for repairs."
-                                onConfirmation={() => console.log("TODO")}
+                                headerText="Confirm Ship Repairs"
+                                contents="Every ship will be sent for repairs. Only ships that are in states READY or BROKEN are affected."
+                                onConfirmation={() => repairAll()}
                                 options={{}}/>
                         <ConfirmationBackedButton
                                 size="lg"
                                 color="warning"
                                 buttonText="Unassign Assigned Ships"
-                                headerText="Confirm Mission Terminations"
-                                contents="Every assigned ship will be unassigned, resulting in loss of mission data."
-                                onConfirmation={() => console.log("TODO")}
+                                headerText="Confirm Mission Unassignments"
+                                contents="Every assigned ship will be unassigned, resulting in loss of mission data. Only ships that are in READY state are affected."
+                                onConfirmation={() => unassignAll()}
                                 options={{}}/>
                         <ConfirmationBackedButton
                                 size="lg"
@@ -375,7 +456,7 @@ function MissionControl() {
                     </ButtonGroup>
                 </InputGroup>
                 <InputGroup>
-                    <ButtonGroup>
+                    <ButtonGroup style={{width: "100%"}}>
                         <InputGroupText style={{width: "200px"}}>Ship load quantity</InputGroupText>
                         <Button
                             color={shipLoadLimit.current === 25 ? "primary" : "secondary"}

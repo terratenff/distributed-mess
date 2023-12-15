@@ -279,6 +279,39 @@ public class ShipController {
     }
 
     /**
+     * Aborts the repairs of selected ship, as long as the repairs have not been started yet.
+     * A ship can only abort its repairs if it is "AWAITING_REPAIRS".
+     * @param ship Ship.
+     * @return ok. (notFound is returned if specified ship could not be found)
+     */
+    @PostMapping("/abort-repair")
+    public ResponseEntity<String> abortShipRepairs(@RequestBody Ship ship) {
+
+        if (!Drydock.getInstance().isInitialized()) {
+            Drydock.getInstance().initialize(saveShipToRepository, saveLogToRepository);
+        }
+
+        if (!EntityValidation.validateShip(ship)) {
+            logger.error("Could not abort ship repairs.");
+            return ResponseEntity.badRequest().build();
+        }
+
+        Long id = ship.getId();
+        Ship targetShip = shipRepository.findById(id).orElse(null);
+        if (targetShip == null) {
+            logger.error("Ship with ID " + id + " not found.");
+            return ResponseEntity.notFound().build();
+        } else if (targetShip.getStatus().startsWith("AWAITING_REPAIRS")) {
+             Drydock.getInstance().removeFromQueue(targetShip);
+            logger.info("Ship with ID " + id + " has been removed from the dry dock repair queue.");
+        } else {
+            logger.warn("Ship with ID " + id + " is not awaiting repairs.");
+        }
+        
+        return ResponseEntity.ok().build();
+    }
+
+    /**
      * Decommissions specified ship, making it unusable.
      * @param ship Ship.
      * @return ok. (notFound is returned if specified ship could not be found)

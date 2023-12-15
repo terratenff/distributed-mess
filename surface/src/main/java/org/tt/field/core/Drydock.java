@@ -103,6 +103,32 @@ public class Drydock {
     }
 
     /**
+     * Removes a ship entity from the repair queue.
+     * @param ship Ship that is to be removed from the queue.
+     * @throws IllegalStateException The dry dock must be initialized first.
+     */
+    public void removeFromQueue(Ship ship) throws IllegalStateException {
+        if (!initialized) {
+            throw new IllegalStateException("Drydock has not been initialized.");
+        }
+        boolean shipRemoved = repairQueue.remove(ship);
+        if (!shipRemoved) {
+            if (targetShip != null && targetShip.equals(ship)) {
+                targetShip = null;
+                shipRemoved = true;
+            }
+        }
+        ship.setStatus("READY");
+        saveShipToRepository.apply(ship);
+        if (shipRemoved) {
+            logger.info("A ship was removed from the queue. Queue size: " + repairQueue.size());
+        } else {
+            logger.info("Specified ship was not removed from the queue.");
+        }
+        updateQueueShipStatus();
+    }
+
+    /**
      * Gets specified ship entity's queue number.
      * @param shipId ID of the ship entity.
      * @return Queue number of the ship. Indexing starts at 1.

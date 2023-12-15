@@ -87,8 +87,14 @@ public class Ship {
         return json.toString();
     }
 
-    public boolean equals(Ship other) {
-        return this.id.equals(other.id);
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Ship)) {
+            return false;
+        } else {
+            Ship other = (Ship) obj;
+            return this.id.equals(other.id);
+        }
     }
 
     public Long getId() {
