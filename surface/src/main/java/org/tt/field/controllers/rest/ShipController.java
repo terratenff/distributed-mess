@@ -87,7 +87,7 @@ public class ShipController {
      */
     @GetMapping
     public List<Ship> getShips() {
-        return shipRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        return shipRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
     }
 
     /**

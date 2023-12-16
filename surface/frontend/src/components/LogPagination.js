@@ -11,6 +11,8 @@ import { Table, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
  */
 function LogPagination({ urlPrefix, limit = 10 }) {
 
+    const INDEX_COUNT = 5;
+
     /**
      * Fetches up to a fixed number of mission events from the application and updates the component with them.
      * The fixed number is based on the value defined in the back-end.
@@ -45,18 +47,21 @@ function LogPagination({ urlPrefix, limit = 10 }) {
     }
 
     /**
-     * Generates a list of pagination indices that are presented for the user to navigate to.
+     * Generates a list of pagination indexes that are presented for the user to navigate to.
      * @param {*} currentIndex Pagination index that the user is currently on.
      * @param {*} pageCount Number of pages that are available. 
-     * @returns Pagination indices that are limited to range [max(currentIndex - 3, 0), min(currentIndex + 3, pageCount)].
+     * @returns Up to 5 pagination indexes that surround current index.
      */
     function generatePaginationIndices(currentIndex, pageCount) {
-        let iMin = currentIndex - 3;
-        let iMax = currentIndex + 3;
+        let iMin = currentIndex - Math.floor(INDEX_COUNT / 2);
+        let iMax = currentIndex + Math.ceil(INDEX_COUNT / 2);
         if (iMin < 0) {
+            iMax += Math.abs(iMin);
             iMin = 0;
         }
         if (iMax > pageCount) {
+            iMin -= iMax - pageCount;
+            iMin = Math.max(0, iMin);
             iMax = pageCount;
         }
 
@@ -95,7 +100,7 @@ function LogPagination({ urlPrefix, limit = 10 }) {
         let active = {"active": page.current === i};
         return (
             <PaginationItem {...active} key={i}>
-                <PaginationLink onClick={() => movePagination(i)}>{i + 1}</PaginationLink>
+                <PaginationLink onClick={() => movePagination(i)} style={{width: "100px"}}>{i + 1}</PaginationLink>
             </PaginationItem>
         );
     });
@@ -117,20 +122,24 @@ function LogPagination({ urlPrefix, limit = 10 }) {
         </Pagination>
     );
 
+    const table = data.length === 0 ? <></> : (
+        <Table borderless hover style={{textAlign: "left", height: "500px"}}>
+            <thead>
+            <tr style={{verticalAlign: "top"}}>
+                <th width="20%">Timestamp</th>
+                <th width="80%">Description</th>
+            </tr>
+            </thead>
+            <tbody>
+                {contents}
+            </tbody>
+        </Table>
+    );
+
     return (
         <>
             {pagination}
-            <Table borderless hover style={{textAlign: "left"}}>
-                <thead>
-                <tr>
-                    <th width="20%">Timestamp</th>
-                    <th width="80%">Description</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {contents}
-                </tbody>
-            </Table>
+            {table}
         </>
     );
 }

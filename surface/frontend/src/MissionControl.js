@@ -322,7 +322,6 @@ function MissionControl() {
         const optsA = {"disabled": (ship.status.startsWith("AWAITING_TAKEOFF") || ship.status === "OUTBOUND" || ship.status === "TAKING_OFF" ? false : true)};
         const optsD = {"disabled": (ship.status === "READY" || ship.status === "BROKEN" ? false : true)};
 
-
         const indicatorFactor = 10.4;
         const conditionIndicatorWidth = ship.condition / indicatorFactor;
         const peakConditionIndicatorWidth = (ship.peakCondition - ship.condition) / indicatorFactor;
@@ -350,10 +349,10 @@ function MissionControl() {
         }
 
         return <AccordionItem key={ship.id}>
-            <AccordionHeader targetId={ship.id.toString()}>
-                <p style={{margin: 0, width: 15 + "%"}}>{ship.status}</p>
+            <AccordionHeader className={ship.mission !== null && ship.status === "READY" ? "ship-header-assigned" : ""} targetId={ship.id.toString()}>
                 <p style={{margin: 0, width: 26 + "%"}}>{ship.name}</p>
-                <p style={{margin: 0, width: 8 + "%"}}>{ship.condition} / {ship.peakCondition}</p>
+                <p style={{margin: 0, width: 15 + "%"}}>{ship.status}</p>
+                <p style={{margin: 0, width: 8 + "%", whiteSpace: "nowrap", overflow: "hidden"}}>{ship.condition} / {ship.peakCondition}</p>
                 <div style={{margin: 0, width: conditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "green"}}></div>
                 <div style={{margin: 0, width: peakConditionIndicatorWidth + "%", height: 12 + "px", backgroundColor: "red"}}></div>
             </AccordionHeader>

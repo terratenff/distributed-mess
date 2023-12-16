@@ -24,3 +24,7 @@
 .page-fill {
   min-height: 100vh;
 }
+
+.ship-header-assigned > button {
+  background-color: lightgreen;
+}
