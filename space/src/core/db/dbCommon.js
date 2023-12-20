@@ -4,15 +4,13 @@ import { sleep } from "../../util.js";
 import { Space } from "../space.js";
 import { Ship } from "../ship.js";
 
-// Development configuration.
-//const HOST = "localhost";
-//const PORT = 8004;
+import config from "../../config.js";
 
-const HOST = "dbs";
-const PORT = 3306;
-const USER = "sample-user";
-const PASSWORD = "sample-password";
-const DATABASE = "sample-db";
+const HOST = config.host;
+const PORT = config.port;
+const USER = config.user;
+const PASSWORD = config.password;
+const DATABASE = config.database;
 
 const CHECK_CONNECTION_ATTEMPTS = 5;
 const CHECK_CONNECTION_DELAY = 1000;

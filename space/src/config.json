@@ -1,0 +1,20 @@
+{
+    "developmentConfig": {
+        "host": "localhost",
+        "port": 8004,
+        "user": "sample-user",
+        "password": "sample-password",
+        "database": "sample-db",
+        "surfaceHost": "localhost",
+        "surfacePort": 8001
+    },
+    "containerConfig": {
+        "host": "dbs",
+        "port": 3306,
+        "user": "sample-user",
+        "password": "sample-password",
+        "database": "sample-db",
+        "surfaceHost": "surface",
+        "surfacePort": 8080
+    }
+}

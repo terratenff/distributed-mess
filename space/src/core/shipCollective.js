@@ -1,5 +1,4 @@
-import http from "http";
-
+import config from "../config.js";
 import { checkConnection } from "./db/dbCommon.js";
 import { initializeSpace } from "./space.js";
 import { setupShips, addShip as addDbShip, removeShip as removeDbShip, updateShips } from "./db/dbShip.js";
@@ -9,6 +8,9 @@ import { setupShips, addShip as addDbShip, removeShip as removeDbShip, updateShi
  * @param {number} ms Delay time in milliseconds.
  */
 const delay = ms => new Promise(res => setTimeout(res, ms));
+
+const HOST = config.surfaceHost;
+const PORT = config.surfacePort;
 
 const SHIP_DATABASE_UPDATE_INTERVAL = 60;
 const LOOP_DELAY = 1000;
@@ -150,8 +152,7 @@ export class ShipCollective {
      * @param {*} ship Inbound ship. 
      */
     sendShipToSurface(ship) {
-        console.log(JSON.stringify(ship));
-        fetch("http://localhost:8080/ships/receive-ship", {
+        fetch(`http://${HOST}:${PORT}/ships/receive-ship`, {
             method: "POST",
             body: JSON.stringify(ship),
             headers: {

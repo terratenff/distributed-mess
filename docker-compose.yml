@@ -9,9 +9,64 @@ services:
       - redis
     volumes:
       - type: bind
-        source: ./app
-        target: /app
+        source: ./crossroad/app
+        target: /crossroad/app
   redis:
     image: "redis:alpine"
     ports:
     - 6379:6379
+  
+  surface:
+    build: ./surface
+    ports:
+      - 8001:8080
+    depends_on:
+      - db
+    networks:
+      - surfacespace
+      - dbnet
+  db:
+    image: "postgres"
+    environment:
+      POSTGRES_USER: sample-user
+      POSTGRES_PASSWORD: sample-password
+      POSTGRES_DB: sample-db
+    ports:
+      - 8002:5432
+    networks:
+      - dbnet
+
+  space:
+    build: ./space
+    ports:
+      - 8003:3333
+    depends_on:
+      - dbs
+    networks:
+      - surfacespace
+      - dbsnet
+  dbs:
+    image: "mysql"
+    environment:
+      MYSQL_USER: sample-user
+      MYSQL_PASSWORD: sample-password
+      MYSQL_ROOT_PASSWORD: root-password
+      MYSQL_DATABASE: sample-db
+    ports:
+      - 8004:3306
+    networks:
+      - dbsnet
+  
+networks:
+  surfacespace:
+    driver: bridge
+    ipam:
+      driver: default
+  dbnet:
+    driver: bridge
+    ipam:
+      driver: default
+  dbsnet:
+    driver: bridge
+    ipam:
+      driver: default
