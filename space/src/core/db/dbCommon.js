@@ -12,7 +12,7 @@ const USER = config.user;
 const PASSWORD = config.password;
 const DATABASE = config.database;
 
-const CHECK_CONNECTION_ATTEMPTS = 5;
+const CHECK_CONNECTION_ATTEMPTS = 10;
 const CHECK_CONNECTION_DELAY = 1000;
 
 /**

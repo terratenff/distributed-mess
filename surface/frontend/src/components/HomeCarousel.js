@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { Carousel, CarouselItem, CarouselControl, CarouselIndicators, CarouselCaption } from 'reactstrap';
+import img1 from "../images/img1.png";
+import img2 from "../images/img2.png";
+import img3 from "../images/img3.png";
+import img4 from "../images/img4.png";
+import img5 from "../images/img5.png";
 
 /**
  * Creates a Carousel component for the home page of the application.
@@ -9,35 +14,35 @@ function HomeCarousel() {
 
     const frontItems = [
         {
-            src: "https://picsum.photos/id/1/1200/800",
+            src: img1,
             altText: "Space",
-            captionHeader: "Space module is out of order.",
-            caption: "Space is currently inaccessible. Stay tuned for updates on that front!",
+            captionHeader: "Travel to space!",
+            caption: "There is a galaxy ahead of us. Arrange some ships to explore it!",
             key: 1
         },
         {
-            src: "https://picsum.photos/id/2/1200/800",
+            src: img2,
             altText: "Mission Control",
             captionHeader: "Send ships to space from Mission Control.",
             caption: "Mission Control lets you assign missions for ships, launch them to space, conduct repairs and, if necessary, abort missions.",
             key: 2
         },
         {
-            src: "https://picsum.photos/id/3/1200/800",
+            src: img3,
             altText: "Shipyard",
             captionHeader: "Create new ships in the Shipyard.",
             caption: "Ships can be created, edited and deleted in the Shipyard.",
             key: 3
         },
         {
-            src: "https://picsum.photos/id/4/1200/800",
+            src: img4,
             altText: "Drydock",
             captionHeader: "Ships are repaired in the Drydock.",
             caption: "Note that Drydock has limited capacity: only one ship can be repaired at a time.",
             key: 4
         },
         {
-            src: "https://picsum.photos/id/5/1200/800",
+            src: img5,
             altText: "Launch Site",
             captionHeader: "Ships are sent to space from the Launch Site.",
             caption: "Once a ship has been instructed to launch to space from Mission Control, it is relocated here. There's only room for one, though.",

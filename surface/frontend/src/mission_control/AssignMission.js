@@ -157,8 +157,6 @@ function AssignMission() {
                         <Input type="select" name="objective" id="objective" defaultValue={mission.objective}
                                onChange={handleChange} key={mission.objective} required>
                             <option>Exploration</option>
-                            <option>Transportation</option>
-                            <option>Search</option>
                         </Input>
                     </FormGroup>
                     <FormGroup>

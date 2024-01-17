@@ -5,6 +5,8 @@ import './App.css';
 import AppNavbar from './AppNavbar';
 import AppFooter from './AppFooter';
 import spaceship from "./images/spaceship.png";
+import shipEvent from './images/ship-event.png';
+import missionEvent from './images/mission-event.png';
 import HomeCarousel from "./components/HomeCarousel";
 import HomeNav from "./components/HomeNav";
 
@@ -203,14 +205,13 @@ function Home() {
         shipLogsCore = shipIndices.map((index) => {
             const currentLog = shipLogsData[index];
             const currentShip = shipData[index];
-            const randomId = Math.floor(Math.random() * 100); // ID for a placeholder image.
             return (
                 <motion.div style={{display: "inline-block"}} key={currentLog.id}
                 initial={{opacity: 0, y: 400}}
                 whileInView={{opacity: 1, y: 0, transition: {duration: 0.5}}}>
                     <Card
                         style={{width: "300px", height: "400px", margin: "10px", display: "inline-block", verticalAlign: "top"}}>
-                        <img alt="(Ship Log Illustration)" src={"https://picsum.photos/id/" + randomId + "/300/200"}/>
+                        <img alt="(Ship Log Illustration)" src={shipEvent}/>
                         <CardBody>
                             <CardTitle>{currentShip.name} - Ship Log</CardTitle>
                             <CardSubtitle className="text-muted">{currentLog.timestamp}</CardSubtitle>
@@ -273,14 +274,13 @@ function Home() {
         missionEventsCore = missionIndices.map((index) => {
             const currentEvent = missionEventsData[index];
             const currentMission = missionData[index];
-            const randomId = Math.floor(Math.random() * 100); // ID for a placeholder image.
             return (
                 <motion.div style={{display: "inline-block"}} key={currentEvent.id}
                 initial={{opacity: 0, y: 400}}
                 whileInView={{opacity: 1, y: 0, transition: {duration: 0.5}}}>
                     <Card
                         style={{width: "300px", height: "400px", margin: "10px", display: "inline-block", verticalAlign: "top"}}>
-                        <img alt="(Mission Event Illustration)" src={"https://picsum.photos/id/" + randomId + "/300/200"}/>
+                        <img alt="(Mission Event Illustration)" src={missionEvent}/>
                         <CardBody>
                             <CardTitle>{currentMission.title} - Ship Event</CardTitle>
                             <CardSubtitle className="text-muted">{currentEvent.timestamp}</CardSubtitle>

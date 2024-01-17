@@ -47,8 +47,6 @@ public class HttpUtils {
             os.write(input, 0, input.length);
 
             int responseCode = conn.getResponseCode();
-            logger.info("Sending POST request to " + url);
-            logger.info("Response code: " + responseCode);
 
             return responseCode >= 200 && responseCode < 300;
             
@@ -116,8 +114,6 @@ public class HttpUtils {
             conn.setDoOutput(true);
 
             int responseCode = conn.getResponseCode();
-            logger.info("Sending GET request to " + url);
-            logger.info("Response code: " + responseCode);
 
             if (responseCode >= 200 && responseCode < 300) {
                 InputStream stream = conn.getInputStream();
@@ -156,8 +152,6 @@ public class HttpUtils {
             conn.setDoOutput(true);
 
             int responseCode = conn.getResponseCode();
-            logger.info("Sending GET request to " + url);
-            logger.info("Response code: " + responseCode);
 
             if (responseCode >= 200 && responseCode < 300) {
                 InputStream stream = conn.getInputStream();
