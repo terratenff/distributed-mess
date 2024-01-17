@@ -2,12 +2,6 @@ import { setupSpace, updateSpacePointVisit } from "./db/dbSpace.js";
 import { randomLetters } from "../util.js";
 
 /**
- * Convenience function for delaying execution.
- * @param {number} ms Delay time in milliseconds.
- */
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
-/**
  * Initializes space class.
  */
 export function initializeSpace() {

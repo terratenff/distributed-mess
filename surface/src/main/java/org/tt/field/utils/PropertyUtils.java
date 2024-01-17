@@ -29,6 +29,12 @@ public class PropertyUtils {
         return props.getProperty("space.url");
     }
 
+    /**
+     * Get an integer value from application.properties file.
+     * @param uri Variable name.
+     * @param defaultValue Variable value to use, if variable cannot be found/used.
+     * @return Variable value from application.properties or provided default value.
+     */
     public static int getInteger(String uri, int defaultValue) {
         Properties props = new Properties();
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -36,6 +42,25 @@ public class PropertyUtils {
         try {
             props.load(stream);
             return Integer.parseInt(props.getProperty(uri));
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Get a boolean value from application.properties file.
+     * @param uri Variable name.
+     * @param defaultValue Variable value to use, if variable cannot be found/used.
+     * @return Variable value from application.properties or provided default value.
+     */
+    public static boolean getBoolean(String uri, boolean defaultValue) {
+        Properties props = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream stream = loader.getResourceAsStream("application.properties");
+        try {
+            props.load(stream);
+            return Boolean.parseBoolean(props.getProperty(uri));
         } catch (IOException e) {
             logger.error(e.getMessage());
             return defaultValue;

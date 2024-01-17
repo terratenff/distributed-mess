@@ -1,21 +1,6 @@
 version: "3.7"
 
 services:
-  crossroad:
-    build: ./crossroad
-    ports:
-      - 8000:5000
-    depends_on:
-      - redis
-    volumes:
-      - type: bind
-        source: ./crossroad/app
-        target: /crossroad/app
-  redis:
-    image: "redis:alpine"
-    ports:
-    - 6379:6379
-  
   surface:
     build: ./surface
     ports:

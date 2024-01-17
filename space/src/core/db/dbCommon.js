@@ -31,6 +31,8 @@ export async function checkConnection() {
         let con = await establishConnection();
         if (con !== null) {
             con.end();
+            Space.useDb = true;
+            Ship.useDb = true;
             return;
         }
 
